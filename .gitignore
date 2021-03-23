@@ -1,4 +1,4 @@
 /.mypy_cache
-/dist
-/build
-
+/dist/
+/build/
+/fastapi_msal.egg-info/
