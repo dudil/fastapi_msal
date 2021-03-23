@@ -1,9 +1,9 @@
-from fastapi import APIRouter, Request, HTTPException, status, Header
+from fastapi import APIRouter, Request, HTTPException, status, Header, Form
 from fastapi.responses import RedirectResponse
 
 from fastapi_msal.core import OptStrList, OptStr
 from fastapi_msal.models import AuthCode, AuthResponse, AuthToken
-from fastapi_msal.security import MSALAuthCodeHandler, MSALAuthorizedForm
+from fastapi_msal.security import MSALAuthCodeHandler
 from fastapi_msal.security.msal_auth_code_handler import BarrierToken
 
 """
@@ -18,7 +18,7 @@ msal_handler = MSALAuthCodeHandler(
 )"""
 
 
-class MsalAuthorizationRouter:
+class MSALAuthorizationRouter:
     def __init__(
         self,
         msal_handler: MSALAuthCodeHandler,
@@ -29,9 +29,7 @@ class MsalAuthorizationRouter:
         if not tags:
             tags = ["authentication"]
         self.router = APIRouter(prefix=prefix, tags=tags)
-        self.router.add_api_route(
-            "/login", self.login, methods=["GET"], response_model=RedirectResponse
-        )
+        self.router.add_api_route("/login", self.login, methods=["GET"])
         self.router.add_api_route(
             "/token", self.get_token, methods=["GET"], response_model=BarrierToken
         )
@@ -82,7 +80,7 @@ class MsalAuthorizationRouter:
         return await self.authorized_flow(request=request, code=code, state=state)
 
     async def post_authorized(
-        self, request: Request, code: str = MSALAuthorizedForm(...)
+        self, request: Request, code: str = Form(...)
     ) -> BarrierToken:
         return await self.authorized_flow(request=request, code=code)
 

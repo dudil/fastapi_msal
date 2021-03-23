@@ -25,36 +25,6 @@ class BarrierToken(BaseModel):
     token_type: str = "bearer"
 
 
-class MSALAuthorizedForm:
-    """
-    Code is taken from fastapi/security/oauth2.py
-
-    This is a dependency class, use it like:
-
-        @app.post("/login")
-        def login(form_data: MSALAuthRequestForm = Depends()):
-            data = form_data.parse()
-            print(data.code)
-            if data.satate
-                print(data.state)
-            return data
-
-    It creates the following Form request parameters in your endpoint:
-
-    code:
-    state:
-
-    """
-
-    def __init__(
-        self,
-        code: str = Form(...),
-        state: Optional[str] = Form(None),
-    ):
-        self.code = code
-        self.state = state
-
-
 class MSALAuthCodeHandler(OAuth2):
     def __init__(
         self,

@@ -1,1 +1,1 @@
-from .auth import MsalAuthorizationRouter
+from .auth import MSALAuthorizationRouter

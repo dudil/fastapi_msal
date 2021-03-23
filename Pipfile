@@ -13,7 +13,8 @@ starlette = "*"
 black = "*"
 pylint = "*"
 pre-commit = "*"
-flit = "*"
+setuptools = "*"
+fastapi-msal = {editable = true, path = "."}
 
 [requires]
 python_version = "3.9"
