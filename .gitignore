@@ -2,3 +2,5 @@
 /dist/
 /build/
 /fastapi_msal.egg-info/
+/.vscode/
+
