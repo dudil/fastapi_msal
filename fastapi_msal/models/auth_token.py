@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Optional
 
 from pydantic import BaseModel, PrivateAttr, Field
@@ -159,7 +159,7 @@ class AuthToken(BaseModel):
     client_info: OptStr = None
     scope: OptStr = None
     refresh_token: OptStr = None
-    refresh_token_expires_in: Optional[datetime] = None
+    refresh_token_expires_in: Optional[timedelta] = None
 
     error: OptStr = None
     """
