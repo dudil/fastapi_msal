@@ -6,17 +6,6 @@ from fastapi_msal.models import AuthCode, AuthResponse, AuthToken
 from fastapi_msal.security import MSALAuthCodeHandler
 from fastapi_msal.security.msal_auth_code_handler import BarrierToken
 
-"""
-msal_handler = MSALAuthCodeHandler(
-    b2c_authority=config.b2c_authority,
-    client_id=config.auth_client_id,
-    client_credential=config.auth_client_secret,
-
-    authorize_url="/auth/login",
-    token_url="/auth/authorized",
-    scopes=config.auth_scope,
-)"""
-
 
 class MSALAuthorizationRouter:
     def __init__(
@@ -25,6 +14,12 @@ class MSALAuthorizationRouter:
         prefix: str = "/auth",
         tags: OptStrList = None,
     ):
+        """
+
+        :param msal_handler: the object of the authentication handler.
+        :param prefix: The router API prefix, default is auth - so login will be /auth/login
+        :param tags: any tags to be use in the OpenAPI documentation
+        """
         self.msal_handler = msal_handler
         if not tags:
             tags = ["authentication"]
@@ -42,10 +37,7 @@ class MSALAuthorizationRouter:
         self.router.add_api_route("/logout", self.logout, methods=["GET"])
 
     async def login(
-        self,
-        request: Request,
-        state: OptStr = None,
-        redirect_uri: OptStr = None,
+        self, request: Request, state: OptStr = None, redirect_uri: OptStr = None,
     ) -> RedirectResponse:
         if not redirect_uri:
             redirect_uri = request.url_for("token")
@@ -93,10 +85,3 @@ class MSALAuthorizationRouter:
         # TODO: Make sure we can call that --> oauth2_scheme.remove_account_from_cache()
         response = RedirectResponse(logout_url)
         return response
-
-
-"""
-@router.get("/me", response_model=UserInfo, response_model_by_alias=False)
-async def get_me_info(token_claims: IDTokenClaims = Depends(oauth2_scheme)) -> UserInfo:
-    return token_claims
-"""
