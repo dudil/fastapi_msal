@@ -1,40 +1,66 @@
+from typing import Optional
+
 from fastapi import APIRouter, Request, HTTPException, status, Header, Form
 from fastapi.responses import RedirectResponse
+from msal import SerializableTokenCache
 
+from fastapi_msal.core import MSALPolicies
 from fastapi_msal.core import OptStrList, OptStr
-from fastapi_msal.models import AuthCode, AuthResponse, AuthToken
+from fastapi_msal.models import AuthCode, AuthResponse, AuthToken, IDTokenClaims
+from fastapi_msal.security import BarrierToken
 from fastapi_msal.security import MSALAuthCodeHandler
-from fastapi_msal.security.msal_auth_code_handler import BarrierToken
 
 
-class MSALAuthorizationRouter:
+class MSALAuthorization:
     def __init__(
         self,
-        msal_handler: MSALAuthCodeHandler,
-        prefix: str = "/auth",
+        client_id: str,
+        client_credential: str,
+        tenant: str,
+        policy: MSALPolicies,
+        scopes: OptStrList = None,
+        endpoints_prefix: str = "auth",
+        login_endpoint: str = "login",
+        token_endpoint: str = "token",
+        logout_endpoint: str = "logout",
+        token_cache: Optional[SerializableTokenCache] = None,
+        app_name: OptStr = None,
+        app_version: OptStr = None,
         tags: OptStrList = None,
     ):
-        """
 
-        :param msal_handler: the object of the authentication handler.
-        :param prefix: The router API prefix, default is auth - so login will be /auth/login
-        :param tags: any tags to be use in the OpenAPI documentation
-        """
-        self.msal_handler = msal_handler
+        self.msal_handler = MSALAuthCodeHandler(
+            client_id=client_id,
+            client_credential=client_credential,
+            tenant=tenant,
+            policy=policy,
+            authorize_url=f"/{endpoints_prefix}/{login_endpoint}",
+            token_url=f"/{endpoints_prefix}/{token_endpoint}",
+            scopes=scopes,
+            token_cache=token_cache,
+            app_name=app_name,
+            app_version=app_version,
+        )
         if not tags:
             tags = ["authentication"]
-        self.router = APIRouter(prefix=prefix, tags=tags)
-        self.router.add_api_route("/login", self.login, methods=["GET"])
+        self.router = APIRouter(prefix=endpoints_prefix, tags=tags)
+        self.router.add_api_route(f"/{login_endpoint}", self.login, methods=["GET"])
         self.router.add_api_route(
-            "/token", self.get_token, methods=["GET"], response_model=BarrierToken
+            f"/{token_endpoint}",
+            self.get_token,
+            methods=["GET"],
+            response_model=BarrierToken,
         )
         self.router.add_api_route(
-            "/authorized",
-            self.post_authorized,
+            f"/{token_endpoint}",
+            self.post_token,
             methods=["POST"],
             response_model=BarrierToken,
         )
-        self.router.add_api_route("/logout", self.logout, methods=["GET"])
+        self.router.add_api_route(f"/{logout_endpoint}", self.logout, methods=["GET"])
+
+    async def __call__(self, request: Request) -> Optional[IDTokenClaims]:
+        return await self.msal_handler.__call__(request=request)
 
     async def login(
         self, request: Request, state: OptStr = None, redirect_uri: OptStr = None,
@@ -71,9 +97,7 @@ class MSALAuthorizationRouter:
     async def get_token(self, request: Request, code: str, state: str) -> BarrierToken:
         return await self.authorized_flow(request=request, code=code, state=state)
 
-    async def post_authorized(
-        self, request: Request, code: str = Form(...)
-    ) -> BarrierToken:
+    async def post_token(self, request: Request, code: str = Form(...)) -> BarrierToken:
         return await self.authorized_flow(request=request, code=code)
 
     async def logout(

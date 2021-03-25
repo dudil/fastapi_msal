@@ -9,6 +9,7 @@ OptStrsDict = Optional[StrsDict]
 
 
 class MSALPolicies(str, Enum):
-    LOGIN = "B2C_1_LOGIN"
-    RESET_PASSWORD = "B2C_1_RESET_PASSWORD"
-    PROFILE = "B2C_1_PROFILE"
+    AAD_MULTI = "AAD_MULTI"
+    AAD_SINGLE = "AAD_SINGLE"
+    B2C_LOGIN = "B2C_1_LOGIN"
+    B2C_PROFILE = "B2C_1_PROFILE"

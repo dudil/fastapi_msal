@@ -1,6 +1,6 @@
 from typing import Optional
 
-from fastapi import Request, HTTPException, status, Form
+from fastapi import Request, HTTPException, status
 from fastapi.openapi.models import (
     OAuthFlows as OAuthFlowsModel,
     OAuthFlowAuthorizationCode,
@@ -30,11 +30,11 @@ class MSALAuthCodeHandler(OAuth2):
         self,
         client_id: str,
         client_credential: str,
+        tenant: str,
+        policy: MSALPolicies,
         authorize_url: str,
         token_url: str,
-        b2c_authority: str,
         scopes: OptStrList = None,
-        policy: MSALPolicies = MSALPolicies.LOGIN,
         token_cache: Optional[SerializableTokenCache] = None,
         app_name: OptStr = None,
         app_version: OptStr = None,
@@ -47,8 +47,9 @@ class MSALAuthCodeHandler(OAuth2):
             )
         )
         super().__init__(flows=flows)
-
-        self.authority = f"{b2c_authority}/{policy}"
+        self.policy = policy
+        self.tenant = tenant
+        self.authority = self.get_authority_url()
         self.scopes = scopes
         self.cca: AsyncConfClient = AsyncConfClient(
             client_id=client_id,
@@ -109,3 +110,17 @@ class MSALAuthCodeHandler(OAuth2):
             )
             return token
         return None
+
+    def get_authority_url(self) -> str:
+        authority_url: str = ""
+        if MSALPolicies.AAD_SINGLE == self.policy:
+            authority_url = f"https://login.microsoftonline.com/common/{self.tenant}"
+        elif MSALPolicies.AAD_MULTI == self.policy:
+            authority_url = "https://login.microsoftonline.com/common/"
+        elif (
+            MSALPolicies.B2C_LOGIN == self.policy
+            or MSALPolicies.B2C_PROFILE == self.policy
+        ):
+            authority_url = f"https://{self.tenant}.b2clogin.com/{self.tenant}.onmicrosoft.com/{self.policy}"
+
+        return authority_url

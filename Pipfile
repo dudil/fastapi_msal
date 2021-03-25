@@ -15,6 +15,7 @@ pylint = "*"
 pre-commit = "*"
 setuptools = "*"
 fastapi-msal = {editable = true, path = "."}
+mypy = "*"
 
 [requires]
 python_version = "3.9"
