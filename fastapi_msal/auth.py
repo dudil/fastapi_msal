@@ -23,6 +23,7 @@ class MSALAuthorization:
         login_path: str = "/login",
         token_path: str = "/token",
         logout_path: str = "/logout",
+        return_to_path: str = "/",
         token_cache: Optional[SerializableTokenCache] = None,
         app_name: OptStr = None,
         app_version: OptStr = None,
@@ -43,6 +44,7 @@ class MSALAuthorization:
         )
         if not tags:
             tags = ["authentication"]
+        self.return_to_path = return_to_path
         self.router = APIRouter(prefix=path_prefix, tags=tags)
         self.router.add_api_route(
             name="login", path=login_path, endpoint=self.login, methods=["GET"]
@@ -98,8 +100,16 @@ class MSALAuthorization:
         request.session["auth_token"] = auth_token.json(exclude_none=True)
         return BarrierToken(access_token=auth_token.id_token)
 
-    async def get_token(self, request: Request, code: str, state: str) -> BarrierToken:
-        return await self.authorized_flow(request=request, code=code, state=state)
+    async def get_token(
+        self, request: Request, code: str, state: str
+    ) -> RedirectResponse:
+        token: BarrierToken = await self.authorized_flow(
+            request=request, code=code, state=state
+        )
+        response = RedirectResponse(
+            url=request.url_for(self.return_to_path), headers=token.generate_header()
+        )
+        return response
 
     async def post_token(self, request: Request, code: str = Form(...)) -> BarrierToken:
         return await self.authorized_flow(request=request, code=code)
@@ -109,7 +119,7 @@ class MSALAuthorization:
     ) -> RedirectResponse:
         request.session.clear()
         callback_url = (
-            referer if referer else str(request.url_for("get_root"))
+            referer if referer else str(request.url_for(self.return_to_path))
         )  # TODO: Needs to see if this generic enough...
         logout_url = self.msal_handler.logout_url(callback_url)
         # TODO: Make sure we can call that --> oauth2_scheme.remove_account_from_cache()

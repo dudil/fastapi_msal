@@ -11,7 +11,7 @@ from msal import SerializableTokenCache
 from pydantic import BaseModel
 
 from fastapi_msal.clients import AsyncConfClient
-from fastapi_msal.core import MSALPolicies, OptStrList, OptStr
+from fastapi_msal.core import MSALPolicies, OptStrList, OptStr, StrsDict
 from fastapi_msal.models import AuthToken, IDTokenClaims, LocalAccount
 
 
@@ -23,6 +23,9 @@ class AuthResponse(BaseModel):
 class BarrierToken(BaseModel):
     access_token: str
     token_type: str = "bearer"
+
+    def generate_header(self) -> StrsDict:
+        return {"Authorization": f"{self.token_type} {self.access_token}"}
 
 
 class MSALAuthCodeHandler(OAuth2):
