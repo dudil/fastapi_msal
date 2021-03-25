@@ -107,7 +107,7 @@ class MSALAuthorization:
             request=request, code=code, state=state
         )
         response = RedirectResponse(
-            url=request.url_for(self.return_to_path), headers=token.generate_header()
+            url=self.return_to_path, headers=token.generate_header()
         )
         return response
 
@@ -119,7 +119,7 @@ class MSALAuthorization:
     ) -> RedirectResponse:
         request.session.clear()
         callback_url = (
-            referer if referer else str(request.url_for(self.return_to_path))
+            referer if referer else str(self.return_to_path)
         )  # TODO: Needs to see if this generic enough...
         logout_url = self.msal_handler.logout_url(callback_url)
         # TODO: Make sure we can call that --> oauth2_scheme.remove_account_from_cache()
