@@ -68,7 +68,7 @@ class MSALAuthorization:
         self, request: Request, state: OptStr = None, redirect_uri: OptStr = None,
     ) -> RedirectResponse:
         if not redirect_uri:
-            redirect_uri = request.url_for("token")
+            redirect_uri = request.url_for("get_token")
         auth_code: AuthCode = await self.msal_handler.cca.initiate_auth_flow(
             redirect_uri=redirect_uri, state=state
         )
