@@ -19,10 +19,10 @@ class MSALAuthorization:
         tenant: str,
         policy: MSALPolicies,
         scopes: OptStrList = None,
-        endpoints_prefix: str = "auth",
-        login_endpoint: str = "login",
-        token_endpoint: str = "token",
-        logout_endpoint: str = "logout",
+        path_prefix: str = "/auth",
+        login_path: str = "/login",
+        token_path: str = "/token",
+        logout_path: str = "/logout",
         token_cache: Optional[SerializableTokenCache] = None,
         app_name: OptStr = None,
         app_version: OptStr = None,
@@ -34,8 +34,8 @@ class MSALAuthorization:
             client_credential=client_credential,
             tenant=tenant,
             policy=policy,
-            authorize_url=f"/{endpoints_prefix}/{login_endpoint}",
-            token_url=f"/{endpoints_prefix}/{token_endpoint}",
+            authorize_url=f"{path_prefix}{login_path}",
+            token_url=f"{path_prefix}{token_path}",
             scopes=scopes,
             token_cache=token_cache,
             app_name=app_name,
@@ -43,21 +43,21 @@ class MSALAuthorization:
         )
         if not tags:
             tags = ["authentication"]
-        self.router = APIRouter(prefix=endpoints_prefix, tags=tags)
-        self.router.add_api_route(f"/{login_endpoint}", self.login, methods=["GET"])
+        self.router = APIRouter(prefix=path_prefix, tags=tags)
+        self.router.add_api_route(login_path, self.login, methods=["GET"])
         self.router.add_api_route(
-            f"/{token_endpoint}",
-            self.get_token,
+            path=token_path,
+            endpoint=self.get_token,
             methods=["GET"],
             response_model=BarrierToken,
         )
         self.router.add_api_route(
-            f"/{token_endpoint}",
-            self.post_token,
+            path=token_path,
+            endpoint=self.post_token,
             methods=["POST"],
             response_model=BarrierToken,
         )
-        self.router.add_api_route(f"/{logout_endpoint}", self.logout, methods=["GET"])
+        self.router.add_api_route(f"/{logout_path}", self.logout, methods=["GET"])
 
     async def __call__(self, request: Request) -> Optional[IDTokenClaims]:
         return await self.msal_handler.__call__(request=request)
