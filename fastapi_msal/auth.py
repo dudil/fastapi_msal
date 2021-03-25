@@ -44,7 +44,9 @@ class MSALAuthorization:
         if not tags:
             tags = ["authentication"]
         self.router = APIRouter(prefix=path_prefix, tags=tags)
-        self.router.add_api_route(name="login", path=login_path, endpoint=self.login, methods=["GET"])
+        self.router.add_api_route(
+            name="login", path=login_path, endpoint=self.login, methods=["GET"]
+        )
         self.router.add_api_route(
             name="get_token",
             path=token_path,
@@ -106,7 +108,9 @@ class MSALAuthorization:
         self, request: Request, referer: OptStr = Header(None)
     ) -> RedirectResponse:
         request.session.clear()
-        callback_url = referer if referer else str(request.url_for("get_root"))  # TODO: Needs to see if this generic enough...
+        callback_url = (
+            referer if referer else str(request.url_for("get_root"))
+        )  # TODO: Needs to see if this generic enough...
         logout_url = self.msal_handler.logout_url(callback_url)
         # TODO: Make sure we can call that --> oauth2_scheme.remove_account_from_cache()
         response = RedirectResponse(logout_url)

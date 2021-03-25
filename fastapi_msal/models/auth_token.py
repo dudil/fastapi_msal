@@ -211,7 +211,7 @@ class AuthToken(BaseModel):
 
     refresh_token: OptStr = None
     """
-    An OAuth 2.0 refresh token. 
+    An OAuth 2.0 refresh token.
     The app can use this token acquire additional access tokens after the current access token expires. 
     Refresh_tokens are long-lived, and can be used to retain access to resources for extended periods of time. 
     For more detail on refreshing an access token, refer to: 
