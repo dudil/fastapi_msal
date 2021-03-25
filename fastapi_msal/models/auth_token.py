@@ -52,7 +52,24 @@ class UserInfo(BaseModel):
     """
 
 
-class IDTokenClaims(UserInfo):
+class AADInternalClaims(BaseModel):
+    aio: OptStr = None
+    """
+    An internal claim used by Azure AD to record data for token reuse. Resources should not use this claim.
+    """
+
+    rh: OptStr = None
+    """
+    An internal claim used by Azure to revalidate tokens. Resources should not use this claim.
+    """
+
+    uti: OptStr = None
+    """
+    An internal claim used by Azure to revalidate tokens. Resources shouldn't use this claim.
+    """
+
+
+class IDTokenClaims(UserInfo, AADInternalClaims):
     exp: Optional[datetime] = None
     """
     The expiration time claim is the time at which the token becomes invalid, represented in epoch time.
@@ -68,7 +85,7 @@ class IDTokenClaims(UserInfo):
 
     ver: OptStr = None
     """
-    The version of the ID token, as defined by Azure AD B2C.
+    Indicates the version of the token.
     """
 
     issuer: OptStr = Field(None, alias="iss")
@@ -125,6 +142,16 @@ class IDTokenClaims(UserInfo):
     The Microsoft Graph will return this ID as the id property for a given user account.
     """
 
+    preferred_username: OptStr = None
+    """
+    The primary username that represents the user. 
+    It could be an email address, phone number, or a generic username without a specified format. 
+    Its value is mutable and might change over time. 
+    Since it is mutable, this value must not be used to make authorization decisions. 
+    It can be used for username hints, however, and in human-readable UI as a username. 
+    The profile scope is required in order to receive this claim. Present only in v2.0 tokens.
+    """
+
     is_new_user: Optional[bool] = Field(None, alias="newUser")
     """
     Indicated if this is a new user in the system (following a registration on AAD web part e.g.)
@@ -145,8 +172,12 @@ class IDTokenClaims(UserInfo):
 class AuthToken(BaseModel):
     id_token: OptStr = None
     """
-    MSAL ID Token are JWT containing a header, payload and signature.
+    A JSON Web Token (JWT). 
+    The app can decode the segments of this token to request information about the user who signed in. 
+    The app can cache the values and display them, and confidential clients can use this for authorization. 
+    For more information about id_tokens, see the id_token reference:
     https://docs.microsoft.com/en-us/azure/active-directory/develop/id-tokens
+    Note: Only provided if openid scope was requested.
     """
 
     id_token_claims: Optional[IDTokenClaims] = None
@@ -154,18 +185,52 @@ class AuthToken(BaseModel):
     The decoded content of id_token
     """
 
+    access_token: OptStr = None
+    """
+    The requested access token. The app can use this token to authenticate to the secured resource, such as a web API.
+    https://docs.microsoft.com/en-us/azure/active-directory/develop/access-tokens
+    """
+
     token_type: OptStr = None
+    """
+    Indicates the token type value. The only type that Azure AD supports is Bearer
+    """
+
     not_before: Optional[datetime] = None
+    expires_in: OptStr[timedelta] = None
+    """
+    How long the access token is valid (in seconds).
+    """
+
     client_info: OptStr = None
     scope: OptStr = None
+    """
+    The scopes that the access_token is valid for. 
+    Optional: this is non-standard, and if omitted the token will be for the scopes requested on the initial flow leg.
+    """
+
     refresh_token: OptStr = None
+    """
+    An OAuth 2.0 refresh token. 
+    The app can use this token acquire additional access tokens after the current access token expires. 
+    Refresh_tokens are long-lived, and can be used to retain access to resources for extended periods of time. 
+    For more detail on refreshing an access token, refer to: 
+    https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-auth-code-flow#refresh-the-access-token
+    Note: Only provided if offline_access scope was requested.
+    """
+
     refresh_token_expires_in: Optional[timedelta] = None
 
     error: OptStr = None
     """
-    returned in case of error
+    An error code string that can be used to classify types of errors that occur, and can be used to react to errors.
     """
+
     error_description: OptStr = None
+    """
+    A specific error message that can help a developer identify the root cause of an authentication error.
+    """
+
     error_uri: OptStr = None
 
     _received: OptStrsDict = PrivateAttr()

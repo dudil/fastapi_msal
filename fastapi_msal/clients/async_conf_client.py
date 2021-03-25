@@ -2,6 +2,7 @@ import json
 from typing import Optional, TypeVar, Callable, Any, List
 from starlette.concurrency import run_in_threadpool
 from msal import ConfidentialClientApplication, SerializableTokenCache
+from msal.application import decorate_scope, _merge_claims_challenge_and_capabilities
 from msal.oauth2cli import oidc
 
 from fastapi_msal.core import StrList, OptStr, StrsDict, OptStrsDict
@@ -83,7 +84,8 @@ class AsyncConfClient:
         claims_challenge: OptStr = None,
     ) -> AuthCode:
         auth_code: StrsDict = await self.__execute_async__(
-            self._cca.initiate_auth_code_flow,
+            # self._cca.initiate_auth_code_flow,
+            func=self.initiate_auth_code_flow_override,
             scopes=self.scopes,
             redirect_uri=redirect_uri,
             state=state,
@@ -137,3 +139,29 @@ class AsyncConfClient:
         if token:
             return AuthToken.parse_dict(to_parse=token)
         return None
+
+    def initiate_auth_code_flow_override(
+            self,
+            scopes,  # type: list[str]
+            redirect_uri=None,
+            state=None,  # Recommended by OAuth2 for CSRF protection
+            prompt=None,
+            login_hint=None,  # type: Optional[str]
+            domain_hint=None,  # type: Optional[str]
+            claims_challenge=None,
+    ):
+        client = oidc.Client(
+            {"authorization_endpoint": self._cca.authority.authorization_endpoint},
+            self._cca.client_id,
+            http_client=self._cca.http_client)
+        flow = client.initiate_auth_code_flow(
+            redirect_uri=redirect_uri, state=state, login_hint=login_hint,
+            prompt=prompt,
+            scope=decorate_scope(scopes, self._cca.client_id),
+            domain_hint=domain_hint,
+            claims=_merge_claims_challenge_and_capabilities(
+                self._cca._client_capabilities, claims_challenge),
+            response_mode="form_post"
+        )
+        flow["claims_challenge"] = claims_challenge
+        return flow
