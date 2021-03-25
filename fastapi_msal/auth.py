@@ -44,14 +44,16 @@ class MSALAuthorization:
         if not tags:
             tags = ["authentication"]
         self.router = APIRouter(prefix=path_prefix, tags=tags)
-        self.router.add_api_route(login_path, self.login, methods=["GET"])
+        self.router.add_api_route(name="login", path=login_path, endpoint=self.login, methods=["GET"])
         self.router.add_api_route(
+            name="get_token",
             path=token_path,
             endpoint=self.get_token,
             methods=["GET"],
             response_model=BarrierToken,
         )
         self.router.add_api_route(
+            name="post_token",
             path=token_path,
             endpoint=self.post_token,
             methods=["POST"],
