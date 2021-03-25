@@ -197,7 +197,7 @@ class AuthToken(BaseModel):
     """
 
     not_before: Optional[datetime] = None
-    expires_in: OptStr[timedelta] = None
+    expires_in: Optional[timedelta] = None
     """
     How long the access token is valid (in seconds).
     """
