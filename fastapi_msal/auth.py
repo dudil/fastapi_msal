@@ -86,9 +86,10 @@ class MSALAuthorization:
         http_exception = HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication Error"
         )
-        auth_code: AuthCode = AuthCode.parse_raw(request.session["auth_code"])
-        if not auth_code:
+        auth_code_raw: OptStr = request.session.get("auth_code", None)
+        if not auth_code_raw:
             raise http_exception
+        auth_code: AuthCode = AuthCode.parse_raw(auth_code_raw)
         if not state:
             state = auth_code.state
         auth_response = AuthResponse(code=code, state=state)
@@ -107,12 +108,15 @@ class MSALAuthorization:
             request=request, code=code, state=state
         )
         response = RedirectResponse(
-            url=self.return_to_path, headers=token.generate_header()
+            url=f"{self.return_to_path}?at={BarrierToken}", headers=token.generate_header()
         )
         return response
 
     async def post_token(self, request: Request, code: str = Form(...)) -> BarrierToken:
-        return await self.authorized_flow(request=request, code=code)
+        token: BarrierToken = await self.authorized_flow(
+            request=request, code=code
+        )
+        return token
 
     async def logout(
         self, request: Request, referer: OptStr = Header(None)
