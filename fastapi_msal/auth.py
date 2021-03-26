@@ -108,7 +108,7 @@ class MSALAuthorization:
             request=request, code=code, state=state
         )
         response = RedirectResponse(
-            url=f"{self.return_to_path}?at={BarrierToken}", headers=token.generate_header()
+            url=f"{self.return_to_path}?token={token.access_token}", headers=token.generate_header()
         )
         return response
 
