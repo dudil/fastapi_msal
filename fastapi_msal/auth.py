@@ -1,7 +1,7 @@
 from typing import Optional
 
 from fastapi import APIRouter, Request, HTTPException, status, Header, Form
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, HTMLResponse
 from msal import SerializableTokenCache
 
 from fastapi_msal.core import MSALPolicies
