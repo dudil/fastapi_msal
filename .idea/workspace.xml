@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="f5dfb631-cb51-4753-9fb0-e2d6b814ff26" name="Default Changelist" comment="" />
+    <list default="true" id="f5dfb631-cb51-4753-9fb0-e2d6b814ff26" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -72,7 +75,7 @@
       <workItem from="1616995458631" duration="24453000" />
       <workItem from="1617025671075" duration="6910000" />
       <workItem from="1617035477346" duration="4188000" />
-      <workItem from="1617040896954" duration="653000" />
+      <workItem from="1617040896954" duration="1259000" />
     </task>
     <task id="LOCAL-00001" summary="First Commit">
       <created>1616507222626</created>
@@ -235,7 +238,14 @@
       <option name="project" value="LOCAL" />
       <updated>1617040768446</updated>
     </task>
-    <option name="localTasksCounter" value="24" />
+    <task id="LOCAL-00024" summary="avoid issues with flit">
+      <created>1617041617075</created>
+      <option name="number" value="00024" />
+      <option name="presentableId" value="LOCAL-00024" />
+      <option name="project" value="LOCAL" />
+      <updated>1617041617075</updated>
+    </task>
+    <option name="localTasksCounter" value="25" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -287,6 +297,7 @@
     <MESSAGE value="Update pylint action" />
     <MESSAGE value="remove editable package for self" />
     <MESSAGE value="Update with Pylint Badge" />
-    <option name="LAST_COMMIT_MESSAGE" value="Update with Pylint Badge" />
+    <MESSAGE value="avoid issues with flit" />
+    <option name="LAST_COMMIT_MESSAGE" value="avoid issues with flit" />
   </component>
 </project>
