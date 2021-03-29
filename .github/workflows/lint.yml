@@ -11,9 +11,8 @@ jobs:
         python-version: 3.9
     - name: Install Requirements
       run: |
-        python -m pip install --upgrade pip
+        python -m pip install --upgrade pip pipenv
         pipenv install --system --deploy --dev --ignore-pipfile
-
     - name: Run Pylint
       run: |
         pylint fastapi_msal
