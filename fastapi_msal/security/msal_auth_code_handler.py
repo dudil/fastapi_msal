@@ -1,129 +1,135 @@
-from typing import Optional
+from typing import Optional, Union
 
+from msal import SerializableTokenCache  # type: ignore
 from fastapi import Request, HTTPException, status
-from fastapi.openapi.models import (
-    OAuthFlows as OAuthFlowsModel,
-    OAuthFlowAuthorizationCode,
-)
-from fastapi.security import OAuth2
-from fastapi.security.utils import get_authorization_scheme_param
-from msal import SerializableTokenCache
-from pydantic import BaseModel
+
+from fastapi.security import OAuth2AuthorizationCodeBearer
+from starlette.responses import RedirectResponse
 
 from fastapi_msal.clients import AsyncConfClient
-from fastapi_msal.core import MSALPolicies, OptStrList, OptStr, StrsDict
-from fastapi_msal.models import AuthToken, IDTokenClaims, LocalAccount
+from fastapi_msal.core import OptStr, StrsDict
+from fastapi_msal.models import (
+    AuthToken,
+    IDTokenClaims,
+    LocalAccount,
+    AuthCode,
+    AuthResponse,
+    MSALClientConfig,
+)
 
 
-class AuthResponse(BaseModel):
-    state: str
-    code: str
-
-
-class BarrierToken(BaseModel):
-    access_token: str
-    token_type: str = "bearer"
-
-    def generate_header(self) -> StrsDict:
-        return {"Authorization": f"{self.token_type} {self.access_token}"}
-
-
-class MSALAuthCodeHandler(OAuth2):
+class MSALAuthCodeHandler:
     def __init__(
-        self,
-        client_id: str,
-        client_credential: str,
-        tenant: str,
-        policy: MSALPolicies,
-        authorize_url: str,
-        token_url: str,
-        scopes: OptStrList = None,
-        token_cache: Optional[SerializableTokenCache] = None,
-        app_name: OptStr = None,
-        app_version: OptStr = None,
+        self, client_config: MSALClientConfig, authorize_url: str, token_url: str,
     ):
-        if not scopes:
-            scopes = []
-        flows = OAuthFlowsModel(
-            authorizationCode=OAuthFlowAuthorizationCode(
-                authorizationUrl=authorize_url, tokenUrl=token_url
-            )
+        self.oauth2flow: OAuth2AuthorizationCodeBearer = OAuth2AuthorizationCodeBearer(
+            authorizationUrl=authorize_url, tokenUrl=token_url
         )
-        super().__init__(flows=flows)
-        self.policy = policy
-        self.tenant = tenant
-        self.authority = self.get_authority_url()
-        self.scopes = scopes
-        self.cca: AsyncConfClient = AsyncConfClient(
-            client_id=client_id,
-            client_credential=client_credential,
-            authority=self.authority,
-            scopes=scopes,
-            token_cache=token_cache,
-            app_name=app_name,
-            app_version=app_version,
-        )
+        self.client_config: MSALClientConfig = client_config
 
-    async def __call__(self, request: Request) -> Optional[IDTokenClaims]:
+    async def __call__(self, request: Request) -> IDTokenClaims:
         http_exception = HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Not authenticated",
             headers={"WWW-Authenticate": "Bearer"},
         )
-        authorization: str = request.headers.get("Authorization")
-        scheme, param = get_authorization_scheme_param(authorization)
-        if not authorization or scheme.lower() != "bearer":
+        token = await self.oauth2flow(request=request)
+        if not token:
             raise http_exception
-
+        token_claims: Optional[IDTokenClaims] = await self.parse_id_token(
+            token=token, validate=False
+        )
+        if not token_claims:
+            raise http_exception
         try:
-            token_claims: Optional[IDTokenClaims] = await self.cca.validate_id_token(
-                id_token=param
-            )
-            return token_claims
-        except RuntimeError as err:
-            # maybe expired - try to refresh
-            print(err)
-            decoded: Optional[IDTokenClaims] = self.cca.decode_id_token(id_token=param)
-            if decoded:
-                auth_token: Optional[AuthToken] = await self._get_token_from_cache(
-                    user_id=decoded.user_id
-                )
-                if auth_token and auth_token.id_token:
-                    try:
-                        token_claims = await self.cca.validate_id_token(
-                            id_token=auth_token.id_token
-                        )
-                        return token_claims
-                    except (RuntimeError, AttributeError) as err:
-                        print(err)
+            token_claims = await self.parse_id_token(token=token, validate=True)
+            if token_claims:
+                return token_claims
+            raise http_exception
+        except (RuntimeError, AttributeError) as err:
+            # TODO: add logging here...
+            # logger.error(err)
+            raise http_exception from err
 
-        raise http_exception
+    async def authorize_redirect(
+        self, request: Request, redirec_uri: str
+    ) -> RedirectResponse:
+        auth_code: AuthCode = await self.msal_app().initiate_auth_flow(
+            redirect_uri=redirec_uri
+        )
+        auth_code.save_to_session(session=request.session)
+        return RedirectResponse(auth_code.auth_uri)
 
-    def logout_url(self, callback_url: str) -> str:
-        logout_url = f"{self.authority}/oauth2/v2.0/logout?post_logout_redirect_uri={callback_url}"
-        return logout_url
+    async def authorize_access_token(
+        self, request: Request, code: str, state: OptStr = None
+    ) -> AuthToken:
+        http_exception = HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication Error"
+        )
+        auth_code: Optional[AuthCode] = AuthCode.load_from_session(
+            session=request.session
+        )
+        if (not auth_code) or (not auth_code.state):
+            raise http_exception
+        if state and (
+            state != auth_code.state
+        ):  # extra validation for correct state if passed in
+            raise http_exception
+        auth_response = AuthResponse(code=code, state=auth_code.state)
+        cache: SerializableTokenCache = self._load_cache(session=request.session)
+        auth_token: AuthToken = await self.msal_app(cache=cache).finalize_auth_flow(
+            auth_code_flow=auth_code, auth_response=auth_response
+        )
+        if auth_token.error or not auth_token.id_token:
+            raise http_exception
+        auth_token.save_to_session(session=request.session)
+        self._save_cache(session=request.session, cache=cache)
+        return auth_token
+
+    async def parse_id_token(
+        self, token: Union[AuthToken, str], validate: bool = True
+    ) -> Optional[IDTokenClaims]:
+        if isinstance(token, AuthToken):
+            id_token: str = token.id_token
+        else:
+            id_token = token
+        if validate:
+            return await self.msal_app().validate_id_token(id_token=id_token)
+        return self.msal_app().decode_id_token(id_token=id_token)
+
+    def logout(self, session: StrsDict, callback_url: str) -> RedirectResponse:
+        session.clear()
+        logout_url = f"{self.client_config.authority}/oauth2/v2.0/logout?post_logout_redirect_uri={callback_url}"
+        return RedirectResponse(url=logout_url)
+
+    @staticmethod
+    def _load_cache(session: StrsDict) -> SerializableTokenCache:
+        cache: SerializableTokenCache = SerializableTokenCache()
+        token_cache = session.get("token_cache", None)
+        if token_cache:
+            cache.deserialize(token_cache)
+        return cache
+
+    @staticmethod
+    def _save_cache(session: StrsDict, cache: SerializableTokenCache) -> None:
+        if cache.has_state_changed:
+            session["token_cache"] = cache.serialize()
+
+    def msal_app(
+        self, cache: Optional[SerializableTokenCache] = None
+    ) -> AsyncConfClient:
+        return AsyncConfClient(client_config=self.client_config, cache=cache)
 
     async def _get_token_from_cache(
-        self, user_id: OptStr = None
+        self, session: StrsDict, user_id: OptStr = None
     ) -> Optional[AuthToken]:
-        accounts: list[LocalAccount] = await self.cca.get_accounts()
+        cache: SerializableTokenCache = self._load_cache(session=session)
+        acc: AsyncConfClient = self.msal_app(cache=cache)
+        accounts: list[LocalAccount] = await acc.get_accounts()
         if accounts and accounts[0] and accounts[0].local_account_id == user_id:
-            token: Optional[AuthToken] = await self.cca.acquire_token_silent(
+            token: Optional[AuthToken] = await acc.acquire_token_silent(
                 account=accounts[0]
             )
+            self._save_cache(session=session, cache=cache)
             return token
         return None
-
-    def get_authority_url(self) -> str:
-        authority_url: str = ""
-        if MSALPolicies.AAD_SINGLE == self.policy:
-            authority_url = f"https://login.microsoftonline.com/common/{self.tenant}"
-        elif MSALPolicies.AAD_MULTI == self.policy:
-            authority_url = "https://login.microsoftonline.com/common/"
-        elif (
-            MSALPolicies.B2C_LOGIN == self.policy
-            or MSALPolicies.B2C_PROFILE == self.policy
-        ):
-            authority_url = f"https://{self.tenant}.b2clogin.com/{self.tenant}.onmicrosoft.com/{self.policy}"
-
-        return authority_url

@@ -7,6 +7,5 @@ MSAL for Python - https://github.com/AzureAD/microsoft-authentication-library-fo
 
 __version__ = "0.0.1"
 
-from .core import MSALPolicies
-from .models import UserInfo, IDTokenClaims
+from .models import UserInfo, IDTokenClaims, MSALClientConfig
 from .auth import MSALAuthorization

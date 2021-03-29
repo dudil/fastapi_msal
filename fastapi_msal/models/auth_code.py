@@ -1,10 +1,10 @@
 from __future__ import annotations
-from pydantic import BaseModel, PrivateAttr
 
-from fastapi_msal.core import OptStr, OptStrList, StrsDict, OptStrsDict
+from fastapi_msal.core import OptStr, OptStrList
+from .base_auth_model import BaseAuthModel
 
 
-class AuthCode(BaseModel):
+class AuthCode(BaseAuthModel):
     state: str
     redirect_uri: str
     auth_uri: str
@@ -12,15 +12,3 @@ class AuthCode(BaseModel):
     code_verifier: OptStr = None
     claims_challenge: OptStr = None
     nonce: OptStr = None
-    _received: OptStrsDict = PrivateAttr(None)
-
-    @classmethod
-    def parse_dict(cls: AuthCode, to_parse: StrsDict) -> AuthCode:
-        auth_code: AuthCode = cls.parse_obj(to_parse)
-        auth_code._received = to_parse
-        return auth_code
-
-
-class AuthResponse(BaseModel):
-    state: OptStr = None
-    code: OptStr = None

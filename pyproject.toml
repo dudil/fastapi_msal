@@ -1,3 +1,66 @@
 [build-system]
-requires = ["setuptools", "wheel"]
-build-backend = "setuptools.build_meta:__legacy__"
+requires = ["flit"]
+build-backend = "flit.buildapi"
+
+[tool.flit.metadata]
+module = "fastapi_msal"
+author = "Dudi Levy"
+author-email = "dudi@elv8.pro"
+home-page = "https://github.com/dudil/fastapi_msal"
+classifiers = [
+    # How mature is this project? Common values are
+    #   3 - Alpha
+    #   4 - Beta
+    #   5 - Production/Stable
+    "Development Status :: 3 - Alpha",
+    # Indicate who your project is intended for
+    "Intended Audience :: Developers",
+    "Intended Audience :: Information Technology",
+    "Intended Audience :: System Administrators",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Software Development :: Security",
+    "Topic :: Software Development",
+    "Typing :: Typed",
+    "Framework :: AsyncIO",
+    # Pick your license as you wish (should match "license" above)
+    "License :: OSI Approved :: MIT License",
+    # Specify the Python versions you support here. In particular, ensure
+    # that you indicate whether you support Python 2, Python 3 or both.
+    "Programming Language :: Python :: 3.9"
+]
+requires = [
+    "pydantic",
+    "starlette",
+    "fastapi",
+    "msal",
+    "itsdangerous"
+]
+description-file = "README.md"
+requires-python = ">=3.9"
+
+[tool.flit.metadata.requires-extra]
+full = [
+    "python-dotenv",
+    "python-multipart"
+]
+
+
+[tool.pylint.master]
+fail-under = "9.5"
+suggestion-mode = "yes"
+
+[tool.pylint.messages_control]
+disable = """
+            C0330, C0326,
+            missing-class-docstring,
+            missing-function-docstring,
+            missing-module-docstring,
+            invalid-name,
+            too-few-public-methods,
+"""
+extension-pkg-whitelist = "pydantic"
+
+[tool.pylint.format]
+max-line-length = "122"
+

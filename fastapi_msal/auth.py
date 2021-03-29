@@ -1,46 +1,30 @@
 from typing import Optional
 
-from fastapi import APIRouter, Request, HTTPException, status, Header, Form
-from fastapi.responses import RedirectResponse, HTMLResponse
-from msal import SerializableTokenCache
+from fastapi import APIRouter, Header, Form
+from starlette.requests import Request
+from starlette.responses import RedirectResponse
 
-from fastapi_msal.core import MSALPolicies
 from fastapi_msal.core import OptStrList, OptStr
-from fastapi_msal.models import AuthCode, AuthResponse, AuthToken, IDTokenClaims
-from fastapi_msal.security import BarrierToken
+from fastapi_msal.models import AuthToken, IDTokenClaims, BarrierToken, MSALClientConfig
 from fastapi_msal.security import MSALAuthCodeHandler
 
 
 class MSALAuthorization:
     def __init__(
         self,
-        client_id: str,
-        client_credential: str,
-        tenant: str,
-        policy: MSALPolicies,
-        scopes: OptStrList = None,
-        path_prefix: str = "/auth",
+        client_config: MSALClientConfig,
+        path_prefix: str = "",
         login_path: str = "/login",
         token_path: str = "/token",
         logout_path: str = "/logout",
         return_to_path: str = "/",
-        token_cache: Optional[SerializableTokenCache] = None,
-        app_name: OptStr = None,
-        app_version: OptStr = None,
         tags: OptStrList = None,
     ):
 
-        self.msal_handler = MSALAuthCodeHandler(
-            client_id=client_id,
-            client_credential=client_credential,
-            tenant=tenant,
-            policy=policy,
+        self.handler = MSALAuthCodeHandler(
+            client_config=client_config,
             authorize_url=f"{path_prefix}{login_path}",
             token_url=f"{path_prefix}{token_path}",
-            scopes=scopes,
-            token_cache=token_cache,
-            app_name=app_name,
-            app_version=app_version,
         )
         if not tags:
             tags = ["authentication"]
@@ -49,6 +33,7 @@ class MSALAuthorization:
         self.router.add_api_route(
             name="login", path=login_path, endpoint=self.login, methods=["GET"]
         )
+
         self.router.add_api_route(
             name="get_token",
             path=token_path,
@@ -56,6 +41,7 @@ class MSALAuthorization:
             methods=["GET"],
             response_model=BarrierToken,
         )
+
         self.router.add_api_route(
             name="post_token",
             path=token_path,
@@ -66,66 +52,38 @@ class MSALAuthorization:
         self.router.add_api_route(f"/{logout_path}", self.logout, methods=["GET"])
 
     async def __call__(self, request: Request) -> Optional[IDTokenClaims]:
-        return await self.msal_handler.__call__(request=request)
+        return await self.handler.__call__(request=request)
 
     async def login(
-        self, request: Request, state: OptStr = None, redirect_uri: OptStr = None,
+        self, request: Request, redirec_uri: OptStr = None,
     ) -> RedirectResponse:
-        if not redirect_uri:
-            redirect_uri = request.url_for("get_token")
-        auth_code: AuthCode = await self.msal_handler.cca.initiate_auth_flow(
-            redirect_uri=redirect_uri, state=state
+        if not redirec_uri:
+            redirec_uri = request.url_for("get_token")
+        return await self.handler.authorize_redirect(
+            request=request, redirec_uri=redirec_uri
         )
-        request.session["auth_code"] = auth_code.json(exclude_none=True)
-        response = RedirectResponse(auth_code.auth_uri)
-        return response
-
-    async def authorized_flow(
-        self, request: Request, code: str, state: OptStr = None
-    ) -> BarrierToken:
-        http_exception = HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication Error"
-        )
-        auth_code_raw: OptStr = request.session.get("auth_code", None)
-        if not auth_code_raw:
-            raise http_exception
-        auth_code: AuthCode = AuthCode.parse_raw(auth_code_raw)
-        if not state:
-            state = auth_code.state
-        auth_response = AuthResponse(code=code, state=state)
-        auth_token: AuthToken = await self.msal_handler.cca.finalize_auth_flow(
-            auth_code_flow=auth_code, auth_response=auth_response
-        )
-        if auth_token.error or not auth_token.id_token:
-            raise http_exception
-        request.session["auth_token"] = auth_token.json(exclude_none=True)
-        return BarrierToken(access_token=auth_token.id_token)
 
     async def get_token(
-        self, request: Request, code: str, state: str
+        self, request: Request, code: str, state: Optional[str]
     ) -> RedirectResponse:
-        token: BarrierToken = await self.authorized_flow(
+        await self.handler.authorize_access_token(
             request=request, code=code, state=state
         )
-        response = RedirectResponse(
-            url=f"{self.return_to_path}?token={token.access_token}", headers=token.generate_header()
+        return RedirectResponse(
+            url=f"{self.return_to_path}", headers=dict(request.headers.items())
         )
-        return response
 
     async def post_token(self, request: Request, code: str = Form(...)) -> BarrierToken:
-        token: BarrierToken = await self.authorized_flow(
+        token: AuthToken = await self.handler.authorize_access_token(
             request=request, code=code
         )
-        return token
+        return BarrierToken(token=token.id_token)
 
     async def logout(
         self, request: Request, referer: OptStr = Header(None)
     ) -> RedirectResponse:
-        request.session.clear()
         callback_url = (
             referer if referer else str(self.return_to_path)
         )  # TODO: Needs to see if this generic enough...
-        logout_url = self.msal_handler.logout_url(callback_url)
         # TODO: Make sure we can call that --> oauth2_scheme.remove_account_from_cache()
-        response = RedirectResponse(logout_url)
-        return response
+        return self.handler.logout(session=request.session, callback_url=callback_url)

@@ -5,17 +5,18 @@ name = "pypi"
 
 [packages]
 pydantic = "*"
+starlette = "*"
 fastapi = "*"
 msal = "*"
-starlette = "*"
+
 
 [dev-packages]
 black = "*"
 pylint = "*"
-pre-commit = "*"
 setuptools = "*"
 fastapi-msal = {editable = true, path = "."}
 mypy = "*"
+flit = "*"
 
 [requires]
 python_version = "3.9"
