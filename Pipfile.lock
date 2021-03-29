@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "61db042451c0c00efb28fd1e6de907f13f4238c05a4f3695f58b1d36509fd141"
+            "sha256": "c1771c50ef30b5acd87e5258e83215f94bf545d14edc1f4b5ca5b8293ec8b1da"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -247,10 +247,6 @@
             ],
             "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4'",
             "version": "==0.16"
-        },
-        "fastapi-msal": {
-            "editable": true,
-            "path": "."
         },
         "flit": {
             "hashes": [
