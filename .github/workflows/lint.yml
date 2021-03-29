@@ -16,4 +16,4 @@ jobs:
 
     - name: Run Pylint
       run: |
-        python lint.py fastapi_msal
+        pylint fastapi_msal
