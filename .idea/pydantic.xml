@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project version="4">
-  <component name="PydanticConfigService">
-    <option name="mypyInitTyped" value="true" />
-    <option name="mypyWarnUntypedFields" value="true" />
-  </component>
-</project>

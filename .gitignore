@@ -108,3 +108,6 @@ flask_session/
 
 # Mac DS_Store
 .DS_Store
+
+# IDEs Project Files
+.idea
