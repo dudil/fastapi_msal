@@ -14,7 +14,7 @@ msal = "*"
 black = "*"
 pylint = "*"
 setuptools = "*"
-fastapi-msal = {editable = true, path = "."}
+# fastapi-msal = {editable = true, path = "."}
 mypy = "*"
 flit = "*"
 
