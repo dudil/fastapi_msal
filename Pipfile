@@ -11,10 +11,13 @@ msal = "*"
 
 
 [dev-packages]
+itsdangerous = "*"
+python-dotenv = "*"
+python-multipart = "*"
+uvicorn = "*"
 black = "*"
 pylint = "*"
 setuptools = "*"
-# fastapi-msal = {editable = true, path = "."}
 mypy = "*"
 flit = "*"
 
