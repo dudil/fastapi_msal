@@ -1,9 +1,8 @@
 from typing import Optional
 from datetime import datetime
 from pydantic import BaseModel, Field
-from fastapi_msal.core import OptStr
+from fastapi_msal.core import OptStr, MSALPolicies
 from .user_info import UserInfo
-from .msal_client_config import MSALPolicies
 
 
 class AADInternalClaims(BaseModel):
