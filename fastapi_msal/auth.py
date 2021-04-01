@@ -84,5 +84,6 @@ class MSALAuthorization:
         # TODO: Make sure we can call that --> oauth2_scheme.remove_account_from_cache()
         return self.handler.logout(session=request.session, callback_url=callback_url)
 
-    def get_scheme(self) -> MSALScheme:
+    @property
+    def scheme(self) -> MSALScheme:
         return MSALScheme(handler=self.handler)
