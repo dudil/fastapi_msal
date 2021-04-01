@@ -24,6 +24,8 @@ class MSALClientConfig(BaseSettings):
     policy: MSALPolicies = MSALPolicies.AAD_SINGLE
     # Optional to set - If you are unsure don't set - it will be filled by MSAL as required
     scopes: StrList = list[str]()
+    # Not in use - for future support
+    session_type: str = "filesystem"
 
     # Set the following params if you wish to change the default MSAL Router endpoints
     path_prefix: str = ""
