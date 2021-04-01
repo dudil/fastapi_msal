@@ -8,7 +8,7 @@ pydantic = "*"
 starlette = "*"
 fastapi = "*"
 msal = "*"
-
+fastapi-msal = {git = "https://github.com/dudil/fastapi_msal.git"}
 
 [dev-packages]
 itsdangerous = "*"
@@ -20,6 +20,7 @@ pylint = "*"
 setuptools = "*"
 mypy = "*"
 flit = "*"
+pre-commit = "*"
 
 [requires]
 python_version = "3.9"
