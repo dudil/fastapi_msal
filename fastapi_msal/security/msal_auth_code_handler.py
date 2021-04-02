@@ -6,7 +6,7 @@ from fastapi import Request, HTTPException, status
 from starlette.responses import RedirectResponse
 
 from fastapi_msal.clients import AsyncConfClient
-from fastapi_msal.core import client_config, OptStr, StrsDict
+from fastapi_msal.core import MSALClientConfig, OptStr, StrsDict
 from fastapi_msal.models import (
     AuthToken,
     IDTokenClaims,
@@ -17,6 +17,9 @@ from fastapi_msal.models import (
 
 
 class MSALAuthCodeHandler:
+    def __init__(self, client_config: MSALClientConfig):
+        self.client_config: MSALClientConfig = client_config
+
     async def authorize_redirect(
         self, request: Request, redirec_uri: str, state: OptStr = None
     ) -> RedirectResponse:
@@ -63,10 +66,9 @@ class MSALAuthCodeHandler:
             return await self.msal_app().validate_id_token(id_token=id_token)
         return self.msal_app().decode_id_token(id_token=id_token)
 
-    @staticmethod
-    def logout(session: StrsDict, callback_url: str) -> RedirectResponse:
+    def logout(self, session: StrsDict, callback_url: str) -> RedirectResponse:
         session.clear()
-        logout_url = f"{client_config.authority}/oauth2/v2.0/logout?post_logout_redirect_uri={callback_url}"
+        logout_url = f"{self.client_config.authority}/oauth2/v2.0/logout?post_logout_redirect_uri={callback_url}"
         return RedirectResponse(url=logout_url)
 
     @staticmethod
@@ -82,9 +84,10 @@ class MSALAuthCodeHandler:
         if cache.has_state_changed:
             session["token_cache"] = cache.serialize()
 
-    @staticmethod
-    def msal_app(cache: Optional[SerializableTokenCache] = None) -> AsyncConfClient:
-        return AsyncConfClient(cache=cache)
+    def msal_app(
+        self, cache: Optional[SerializableTokenCache] = None
+    ) -> AsyncConfClient:
+        return AsyncConfClient(client_config=self.client_config, cache=cache)
 
     async def _get_token_from_cache(
         self, session: StrsDict, user_id: OptStr = None

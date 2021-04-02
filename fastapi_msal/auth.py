@@ -4,17 +4,19 @@ from fastapi import APIRouter, Header, Form
 from starlette.requests import Request
 from starlette.responses import RedirectResponse
 
-from fastapi_msal.core import OptStrList, OptStr, client_config
+from fastapi_msal.core import OptStrList, OptStr, MSALClientConfig
 from fastapi_msal.models import AuthToken, BearerToken
 from fastapi_msal.security import MSALAuthCodeHandler, MSALScheme
 
 
 class MSALAuthorization:
     def __init__(
-        self, return_to_path: str = "/", tags: OptStrList = None,
+        self,
+        client_config: MSALClientConfig,
+        return_to_path: str = "/",
+        tags: OptStrList = None,
     ):
-
-        self.handler = MSALAuthCodeHandler()
+        self.handler = MSALAuthCodeHandler(client_config=client_config)
         if not tags:
             tags = ["authentication"]
         self.return_to_path = return_to_path
@@ -51,8 +53,14 @@ class MSALAuthorization:
         )
 
     async def login(
-        self, request: Request, redirect_uri: OptStr = None, state: OptStr = None
+        self,
+        request: Request,
+        redirect_uri: OptStr = None,
+        state: OptStr = None,
+        client_id: OptStr = None,
     ) -> RedirectResponse:
+        if client_id:
+            print(client_id)
         if not redirect_uri:
             redirect_uri = request.url_for("get_token")
         return await self.handler.authorize_redirect(
@@ -78,12 +86,13 @@ class MSALAuthorization:
     async def logout(
         self, request: Request, referer: OptStr = Header(None)
     ) -> RedirectResponse:
-        callback_url = (
-            referer if referer else str(self.return_to_path)
-        )  # TODO: Needs to see if this generic enough...
-        # TODO: Make sure we can call that --> oauth2_scheme.remove_account_from_cache()
+        callback_url = referer if referer else str(self.return_to_path)
         return self.handler.logout(session=request.session, callback_url=callback_url)
 
     @property
     def scheme(self) -> MSALScheme:
-        return MSALScheme(handler=self.handler)
+        return MSALScheme(
+            authorizationUrl=self.router.url_path_for("login"),
+            tokenUrl=self.router.url_path_for("post_token"),
+            handler=self.handler,
+        )

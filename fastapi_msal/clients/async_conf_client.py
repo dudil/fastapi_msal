@@ -4,7 +4,7 @@ from starlette.concurrency import run_in_threadpool
 from msal import ConfidentialClientApplication, SerializableTokenCache  # type: ignore
 from msal.oauth2cli import oidc  # type: ignore
 
-from fastapi_msal.core import OptStr, StrsDict, OptStrsDict, client_config
+from fastapi_msal.core import MSALClientConfig, OptStr, StrsDict, OptStrsDict
 from fastapi_msal.models import (
     AuthCode,
     AuthToken,
@@ -18,7 +18,9 @@ T = TypeVar("T")
 
 class AsyncConfClient:
     def __init__(
-        self, cache: Optional[SerializableTokenCache] = None,
+        self,
+        client_config: MSALClientConfig,
+        cache: Optional[SerializableTokenCache] = None,
     ):
         self.client_config = client_config
         self._cca = ConfidentialClientApplication(

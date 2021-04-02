@@ -11,9 +11,6 @@ class MSALPolicies(str, Enum):
 
 
 class MSALClientConfig(BaseSettings):
-    class Config:
-        env_file = "fastapi_msal.env"
-
     # The following params must be set according to the app registration data recieved from AAD
     # https://docs.microsoft.com/azure/active-directory/develop/quickstart-v2-register-an-app
     client_id: OptStr
@@ -58,6 +55,3 @@ class MSALClientConfig(BaseSettings):
     @property
     def login_full_path(self) -> str:
         return f"{self.path_prefix}{self.login_path}"
-
-
-client_config: MSALClientConfig = MSALClientConfig()
