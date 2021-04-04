@@ -68,7 +68,7 @@ app.include_router(msal_auth.router)
 
 
 @app.get("/users/me", response_model=UserInfo, response_model_exclude_none=True)
-async def read_users_me(current_user: UserInfo = Depends(msal_auth.get_scheme())) -> UserInfo:
+async def read_users_me(current_user: UserInfo = Depends(msal_auth.scheme)) -> UserInfo:
     return current_user
 
 
