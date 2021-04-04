@@ -21,7 +21,9 @@ As a result the pacage was built around simplicity and ease of use on the expens
 1. Includes Async implementation of MSAL confidential client class utilizaing Starlette threadpool model.
 1. Use pydantic models to translate the MSAL objects to data objects which are code and easy to work with.
 1. Have a built-in router which includes the required paths for the authentication flow.
-1. Includes a pydantic setting class for easy and secure configuration from your ENV (or .env)
+1. Include a dependency class to authenticate and secure your application APIs
+1. Includes a pydantic setting class for easy and secure configuration from your ENV (or .env or secrets directory)
+1. Full support with FastAPI swagger documentations and authentication simulation
 
 ## Installation
 With [pipenv](https://pipenv.pypa.io/en/latest/)
