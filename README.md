@@ -57,15 +57,16 @@ Make sure to update the lines with the information retrieved in the previous ste
 import uvicorn
 from fastapi import FastAPI, Depends
 from starlette.middleware.sessions import SessionMiddleware
-from fastapi_msal import MSALAuthorization, UserInfo, client_config
+from fastapi_msal import MSALAuthorization, UserInfo, MSALClientConfig
 
+client_config: MSALClientConfig = MSALClientConfig()
 client_config.client_id = "The Client ID rerived at step #1"
 client_config.client_credential = "The Client secret retrived at step #1"
 client_config.tenant = "Your tenant id"
 
 app = FastAPI()
-app.add_middleware(SessionMiddleware, secret_key=client_config.client_credential")  # don't do this in production!
-msal_auth = MSALAuthorization()
+app.add_middleware(SessionMiddleware, secret_key="SOME_SSH_KEY_ONLY_YOU_KNOW")  # replace with your own!!!
+msal_auth = MSALAuthorization(client_config=client_config)
 app.include_router(msal_auth.router)
 
 
