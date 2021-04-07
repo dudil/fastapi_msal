@@ -87,7 +87,15 @@ class MSALAuthorization:
         self, request: Request, referer: OptStr = Header(None)
     ) -> RedirectResponse:
         callback_url = referer if referer else str(self.return_to_path)
-        return self.handler.logout(session=request.session, callback_url=callback_url)
+        return self.handler.logout(request=request, callback_url=callback_url)
+
+    async def check_authenticated_session(self, request: Request) -> bool:
+        auth_token: Optional[AuthToken] = await self.handler.get_token_from_session(request=request)
+        if auth_token and auth_token.id_token:
+            token_claims = self.handler.parse_id_token(request=request, token=auth_token)
+            if token_claims:
+                return True
+        return False
 
     @property
     def scheme(self) -> MSALScheme:

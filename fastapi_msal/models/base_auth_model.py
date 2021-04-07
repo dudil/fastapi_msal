@@ -1,7 +1,6 @@
-from __future__ import annotations
 from typing import Optional, TypeVar, Type
 from pydantic import BaseModel, PrivateAttr
-from fastapi_msal.core import OptStrsDict, StrsDict, OptStr
+from fastapi_msal.core import OptStrsDict, StrsDict, SessionManager
 
 AuthModel = TypeVar("AuthModel", bound="BaseAuthModel")
 
@@ -15,14 +14,11 @@ class BaseAuthModel(BaseModel):
         debug_model.__setattr__("_recieved", to_parse)
         return debug_model
 
-    def save_to_session(self: AuthModel, session: StrsDict) -> None:
-        session.update({self.__repr_name__(): self.json(exclude_none=True)})
+    async def save_to_session(self: AuthModel, session: SessionManager) -> None:
+        session.save(self)
 
     @classmethod
-    def load_from_session(
-        cls: Type[AuthModel], session: StrsDict
+    async def load_from_session(
+        cls: Type[AuthModel], session: SessionManager
     ) -> Optional[AuthModel]:
-        raw_object: OptStr = session.get(cls.__name__, None)
-        if raw_object:
-            return cls.parse_raw(raw_object)
-        return None
+        return session.load(model_cls=cls)

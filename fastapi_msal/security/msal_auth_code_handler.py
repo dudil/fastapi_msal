@@ -6,7 +6,7 @@ from fastapi import Request, HTTPException, status
 from starlette.responses import RedirectResponse
 
 from fastapi_msal.clients import AsyncConfClient
-from fastapi_msal.core import MSALClientConfig, OptStr, StrsDict
+from fastapi_msal.core import MSALClientConfig, OptStr, StrsDict, SessionManager
 from fastapi_msal.models import (
     AuthToken,
     IDTokenClaims,
@@ -26,7 +26,9 @@ class MSALAuthCodeHandler:
         auth_code: AuthCode = await self.msal_app().initiate_auth_flow(
             redirect_uri=redirec_uri, state=state
         )
-        auth_code.save_to_session(session=request.session)
+        session = SessionManager(request=request)
+        session.init_session(session_id=auth_code.state)
+        await auth_code.save_to_session(session=SessionManager(request=request))
         return RedirectResponse(auth_code.auth_uri)
 
     async def authorize_access_token(
@@ -35,8 +37,8 @@ class MSALAuthCodeHandler:
         http_exception = HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication Error"
         )
-        auth_code: Optional[AuthCode] = AuthCode.load_from_session(
-            session=request.session
+        auth_code: Optional[AuthCode] = await AuthCode.load_from_session(
+            session=SessionManager(request=request)
         )
         if (not auth_code) or (not auth_code.state):
             raise http_exception
@@ -51,25 +53,33 @@ class MSALAuthCodeHandler:
         )
         if auth_token.error or not auth_token.id_token:
             raise http_exception
-        auth_token.save_to_session(session=request.session)
+        await auth_token.save_to_session(session=SessionManager(request=request))
         self._save_cache(session=request.session, cache=cache)
         return auth_token
 
+    # TODO: needs rewrite of method, probably seperate into 2 different methods
     async def parse_id_token(
-        self, token: Union[AuthToken, str], validate: bool = True
+        self, request: Request, token: Union[AuthToken, str], validate: bool = True
     ) -> Optional[IDTokenClaims]:
         if isinstance(token, AuthToken):
             id_token: str = token.id_token
         else:
             id_token = token
+        auth_token: Optional[AuthToken] = await self.get_token_from_session(request=request)
+        if auth_token and auth_token.id_token == id_token and auth_token.id_token_claims and not validate:
+            return auth_token.id_token_claims
         if validate:
             return await self.msal_app().validate_id_token(id_token=id_token)
         return self.msal_app().decode_id_token(id_token=id_token)
 
-    def logout(self, session: StrsDict, callback_url: str) -> RedirectResponse:
-        session.clear()
+    def logout(self, request: Request, callback_url: str) -> RedirectResponse:
+        SessionManager(request=request).clear()
         logout_url = f"{self.client_config.authority}/oauth2/v2.0/logout?post_logout_redirect_uri={callback_url}"
         return RedirectResponse(url=logout_url)
+
+    @staticmethod
+    async def get_token_from_session(request: Request) -> Optional[AuthToken]:
+        return await AuthToken.load_from_session(session=SessionManager(request=request))
 
     @staticmethod
     def _load_cache(session: StrsDict) -> SerializableTokenCache:
