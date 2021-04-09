@@ -8,7 +8,6 @@ pydantic = "*"
 starlette = "*"
 fastapi = "*"
 msal = "*"
-fastapi-msal = {git = "https://github.com/dudil/fastapi_msal.git"}
 
 [dev-packages]
 itsdangerous = "*"

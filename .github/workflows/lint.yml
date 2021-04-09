@@ -1,12 +1,12 @@
-name: PyLint Runner
+name: Lint & Security
 on: [push]
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
     - name: Set up Python 3.9
-      uses: actions/setup-python@v1
+      uses: actions/setup-python@v2
       with:
         python-version: 3.9
     - name: Install Requirements
@@ -16,3 +16,8 @@ jobs:
     - name: Run Pylint
       run: |
         pylint fastapi_msal
+    - name: Run MyPy
+      run: |
+        mypy fastapi_msal
+    - name: PyCharm Python Security Scanner
+      uses: tonybaloney/pycharm-security@1.22.2
