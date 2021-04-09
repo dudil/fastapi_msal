@@ -1,7 +1,8 @@
 # FastAPI/MSAL - MSAL (Microsoft Authentication Library) plugin for FastAPI
 [![Checked with mypy](http://www.mypy-lang.org/static/mypy_badge.svg)](http://mypy-lang.org/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![Checked with Pylint](https://github.com/dudil/fastapi_msal/actions/workflows/lint.yml/badge.svg)](https://github.com/dudil/fastapi_msal/actions/workflows/lint.yml)
+[![Lint & Security](https://github.com/dudil/fastapi_msal/actions/workflows/lint.yml/badge.svg)](https://github.com/dudil/fastapi_msal/actions/workflows/lint.yml)
+[![Download monthly](https://pepy.tech/badge/fastapi_msal/month)](https://pypistats.org/packages/fastapi_msal)
 
 FastAPI - https://github.com/tiangolo/fastapi
 _FastAPI is a modern, fast (high-performance), web framework for building APIs based on standard Python type hints._
