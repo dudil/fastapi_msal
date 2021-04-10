@@ -15,12 +15,13 @@ pylint = "*"
 setuptools = "*"
 mypy = "*"
 flit = "*"
+gitpython = "*"
 
 [requires]
 python_version = "3.9"
 
 [scripts]
-publish = "flit publish"
+publish = "python ./scripts/publish.py"
 
 [pipenv]
 allow_prereleases = true
