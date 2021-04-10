@@ -14,7 +14,7 @@ class VersionHandler:
         self.version_file = version_file
         self.file_content = version_file.read_text()
         match = re.search(r"__version__ *= *\"(\d)\.(\d)\.(\d)\"", self.file_content)
-        if not match or not len(match.groups()) != 3:
+        if not match or len(match.groups()) != 3:
             raise LookupError("No version line on file")
         self.version_line = match[0]
         self.major: int = int(match[1])
