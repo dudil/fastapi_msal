@@ -4,7 +4,7 @@ import subprocess
 import sys
 from argparse import ArgumentParser
 from pathlib import Path
-from git import Repo  # type: ignore
+from python_git_wrapper import Repository
 
 
 class VersionHandler:
@@ -42,19 +42,23 @@ if __name__ == "__main__":
     if args.password:
         os.putenv("FLIT_PASSWORD", args.password)
 
-    repo = Repo()
+    repo = Repository('.')
+    """
     if repo.is_dirty():
         print("Git is dirty - please review the following files:")
         for diff in repo.index.diff(None):
             print(diff.a_path)
         sys.exit(-1)
+    """
 
     package_init = Path("./fastapi_msal/__init__.py").resolve()
     version = VersionHandler(version_file=package_init)
     version.build += 1
     version.update_file()
-    commit = repo.index.commit(f"Publish New Package Version: {str(version)}")
-    if len(repo.remote().push()) == 0:
+
+    commit = repo.commit(message=f"Publish New Package Version: {str(version)}", add_files=True)
+    repo.push()
+    if len(repo.remote().push(refspec=repo.refs)) == 0:
         print("Push to remote failed.")
         sys.exit(-1)
 

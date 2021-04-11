@@ -15,7 +15,7 @@ pylint = "*"
 setuptools = "*"
 mypy = "*"
 flit = "*"
-gitpython = "*"
+python_git_wrapper = "*"
 
 [requires]
 python_version = "3.9"
