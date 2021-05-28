@@ -27,19 +27,18 @@ As a result the pacage was built around simplicity and ease of use on the expens
 1. Full support with FastAPI swagger documentations and authentication simulation
 
 ## Installation
-With [pipenv](https://pipenv.pypa.io/en/latest/)
 ```shell
-pipenv install fastapi_msal
+pip install fastapi_msal
 ```
 
 ## Prerequisets
-As part of your fastapi application the following packages should be included
+As part of your fastapi application the following packages should be included  
 TL;DR: If you just wish to install it all use
 ```shell
 pipenv install "fastapi_msal[full]"
 ```
 
-1. [python-multipart](https://andrew-d.github.io/python-multipart/)
+1. [python-multipart](https://andrew-d.github.io/python-multipart/),
 _[From FastAPI documentation](https://fastapi.tiangolo.com/tutorial/security/first-steps/#run-it)_:
 This is required since OAuth2 (Which MSAL is based upon) uses "form data" to send the credentials.
 
@@ -71,7 +70,7 @@ msal_auth = MSALAuthorization(client_config=client_config)
 app.include_router(msal_auth.router)
 
 
-@app.get("/users/me", response_model=UserInfo, response_model_exclude_none=True)
+@app.get("/users/me", response_model=UserInfo, response_model_exclude_none=True, response_model_by_alias=False))
 async def read_users_me(current_user: UserInfo = Depends(msal_auth.scheme)) -> UserInfo:
     return current_user
 
