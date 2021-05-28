@@ -39,6 +39,11 @@ full = [
     "python-multipart",
     "itsdangerous"
 ]
+dev = [
+    "black",
+    "pylint",
+    "mypy"
+]
 
 [tool.flit.sdist]
 exclude = ["docs/"]
