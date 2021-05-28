@@ -40,6 +40,9 @@ full = [
     "itsdangerous"
 ]
 
+[tool.flit.sdist]
+exclude = ["docs/"]
+
 
 [tool.pylint.master]
 fail-under = "9.5"
