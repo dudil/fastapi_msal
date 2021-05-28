@@ -19,12 +19,16 @@ class CacheManager:
     cache_db: StrsDict = dict()
 
     @classmethod
-    def write(cls, key: str, value: StrsDict) -> None:  # TODO: make sure we run this one at a time
+    def write(
+        cls, key: str, value: StrsDict
+    ) -> None:  # TODO: make sure we run this one at a time
         value_json: str = json.dumps(value)
         cls.cache_db.update({key: value_json})
 
     @classmethod
-    def read(cls, key: str) -> Optional[StrsDict]:  # TODO: make sure we run this one at a time
+    def read(
+        cls, key: str
+    ) -> Optional[StrsDict]:  # TODO: make sure we run this one at a time
         value_json: OptStr = cls.cache_db.get(key, None)
         if value_json:
             return json.loads(value_json)
@@ -49,7 +53,9 @@ class SessionManager:
 
     def _read_session(self) -> StrsDict:
         if not self.session_id:
-            raise IOError("No session id, (Make sure you initialized the session by calling init_session)")
+            raise IOError(
+                "No session id, (Make sure you initialized the session by calling init_session)"
+            )
         session: OptStrsDict = self.cache_manager.read(self.session_id)
         if session:
             return session
@@ -57,12 +63,16 @@ class SessionManager:
 
     def _write_session(self, session: StrsDict) -> None:
         if not self.session_id:
-            raise IOError("No session id, (Make sure you initialized the session by calling init_session)")
+            raise IOError(
+                "No session id, (Make sure you initialized the session by calling init_session)"
+            )
         self.cache_manager.write(key=self.session_id, value=session)
 
     def save(self, model: M) -> None:
         session: StrsDict = self._read_session()
-        session.update({model.__repr_name__(): model.json(exclude_none=True, by_alias=True)})
+        session.update(
+            {model.__repr_name__(): model.json(exclude_none=True, by_alias=True)}
+        )
         self._write_session(session=session)
 
     def load(self, model_cls: Type[M]) -> Optional[M]:

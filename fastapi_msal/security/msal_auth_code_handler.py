@@ -65,8 +65,15 @@ class MSALAuthCodeHandler:
             id_token: str = token.id_token
         else:
             id_token = token
-        auth_token: Optional[AuthToken] = await self.get_token_from_session(request=request)
-        if auth_token and auth_token.id_token == id_token and auth_token.id_token_claims and not validate:
+        auth_token: Optional[AuthToken] = await self.get_token_from_session(
+            request=request
+        )
+        if (
+            auth_token
+            and auth_token.id_token == id_token
+            and auth_token.id_token_claims
+            and not validate
+        ):
             return auth_token.id_token_claims
         if validate:
             return await self.msal_app().validate_id_token(id_token=id_token)
@@ -79,7 +86,9 @@ class MSALAuthCodeHandler:
 
     @staticmethod
     async def get_token_from_session(request: Request) -> Optional[AuthToken]:
-        return await AuthToken.load_from_session(session=SessionManager(request=request))
+        return await AuthToken.load_from_session(
+            session=SessionManager(request=request)
+        )
 
     @staticmethod
     def _load_cache(session: StrsDict) -> SerializableTokenCache:

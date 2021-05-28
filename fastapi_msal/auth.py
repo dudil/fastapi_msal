@@ -77,7 +77,9 @@ class MSALAuthorization:
             url=f"{self.return_to_path}", headers=dict(request.headers.items())
         )
 
-    async def _post_token_route(self, request: Request, code: str = Form(...)) -> BearerToken:
+    async def _post_token_route(
+        self, request: Request, code: str = Form(...)
+    ) -> BearerToken:
         token: AuthToken = await self.handler.authorize_access_token(
             request=request, code=code
         )
@@ -95,7 +97,9 @@ class MSALAuthorization:
     async def check_authenticated_session(self, request: Request) -> bool:
         auth_token: Optional[AuthToken] = await self.get_session_token(request)
         if auth_token and auth_token.id_token:
-            token_claims = self.handler.parse_id_token(request=request, token=auth_token)
+            token_claims = self.handler.parse_id_token(
+                request=request, token=auth_token
+            )
             if token_claims:
                 return True
         return False
