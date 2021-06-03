@@ -70,7 +70,7 @@ msal_auth = MSALAuthorization(client_config=client_config)
 app.include_router(msal_auth.router)
 
 
-@app.get("/users/me", response_model=UserInfo, response_model_exclude_none=True, response_model_by_alias=False))
+@app.get("/users/me", response_model=UserInfo, response_model_exclude_none=True, response_model_by_alias=False)
 async def read_users_me(current_user: UserInfo = Depends(msal_auth.scheme)) -> UserInfo:
     return current_user
 
