@@ -18,7 +18,7 @@ class CacheType(Enum):
 class CacheManager:
     cache_db: StrsDict = dict()
 
-    def __init__(self):
+    def __init__(self) -> None:
         pass
 
     @classmethod
@@ -70,7 +70,11 @@ class SessionManager:
         self.cache_manager.write(key=self.session_id, value=session)
 
     def save(self, model: M) -> None:
-        session: StrsDict = self._read_session()
+        session: OptStrsDict = self._read_session()
+        if not session:
+            raise IOError(
+                "No session id, (Make sure you initialized the session by calling init_session)"
+            )
         session.update(
             {model.__repr_name__(): model.json(exclude_none=True, by_alias=True)}
         )
