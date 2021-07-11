@@ -18,6 +18,9 @@ class CacheType(Enum):
 class CacheManager:
     cache_db: StrsDict = dict()
 
+    def __init__(self):
+        pass
+
     @classmethod
     def write(
         cls, key: str, value: StrsDict
@@ -51,15 +54,13 @@ class SessionManager:
     def init_session(self, session_id: str) -> None:
         self.request.session.update({SESSION_KEY: session_id})
 
-    def _read_session(self) -> StrsDict:
+    def _read_session(self) -> OptStrsDict:
         if not self.session_id:
-            raise IOError(
-                "No session id, (Make sure you initialized the session by calling init_session)"
-            )
+            return None
         session: OptStrsDict = self.cache_manager.read(self.session_id)
         if session:
             return session
-        return dict()
+        return dict()  # return empty session object
 
     def _write_session(self, session: StrsDict) -> None:
         if not self.session_id:
@@ -76,10 +77,11 @@ class SessionManager:
         self._write_session(session=session)
 
     def load(self, model_cls: Type[M]) -> Optional[M]:
-        session: StrsDict = self._read_session()
-        raw_model: OptStr = session.get(model_cls.__name__, None)
-        if raw_model:
-            return model_cls.parse_raw(raw_model)
+        session: OptStrsDict = self._read_session()
+        if session:
+            raw_model: OptStr = session.get(model_cls.__name__, None)
+            if raw_model:
+                return model_cls.parse_raw(raw_model)
         return None
 
     def clear(self) -> None:
