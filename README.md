@@ -27,23 +27,25 @@ As a result the pacage was built around simplicity and ease of use on the expens
 1. Full support with FastAPI swagger documentations and authentication simulation
 
 ## Installation
-```shell
-pip install fastapi_msal
-```
 
-## Prerequisets
-As part of your fastapi application the following packages should be included  
-TL;DR: If you just wish to install it all use
+```shell
+pip install "fastapi_msal"
+```
+Or if you wish to have all the required packages straight forward
 ```shell
 pipenv install "fastapi_msal[full]"
 ```
 
-1. [python-multipart](https://andrew-d.github.io/python-multipart/),
-_[From FastAPI documentation](https://fastapi.tiangolo.com/tutorial/security/first-steps/#run-it)_:
-This is required since OAuth2 (Which MSAL is based upon) uses "form data" to send the credentials.
+## Prerequisets
+1. Python 3.7 and above
+2. As part of your fastapi application the following packages should be included:  
+(if you use the **[full]** method it is not required.)
+   1. [python-multipart](https://andrew-d.github.io/python-multipart/),
+   _[From FastAPI documentation](https://fastapi.tiangolo.com/tutorial/security/first-steps/#run-it)_:
+   This is required since OAuth2 (Which MSAL is based upon) uses "form data" to send the credentials.
 
-1. [itsdangerous](https://github.com/pallets/itsdangerous)
-Used by Starlette [session middleware](https://www.starlette.io/middleware/)
+   2. [itsdangerous](https://github.com/pallets/itsdangerous)
+   Used by Starlette [session middleware](https://www.starlette.io/middleware/)
 
 ## Usage
 1. Follow the application [registration process
@@ -102,8 +104,13 @@ INFO:     Application startup complete.
 7. Trying out the _ME_ api endpoint
 ![Me Page Image](https://github.com/dudil/fastapi_msal/blob/master/docs/images/me_page.png?raw=true)
 
+## Working Example/Template
+If you wish to try out a working example, clone the following project and adjust it to your needs:
+[https://github.com/dudil/ms-identity-python-webapp](https://github.com/dudil/ms-identity-python-webapp)
+
+**NB!** Make sure you are using the *fastapi_msal* branch!!!
 
 ## TODO List
 - [ ] Add support for local/redis session cache
 - [ ] Add Tests
-- [ ] Poper Documentation
+- [ ] Proper Documentation
