@@ -71,7 +71,7 @@ class SessionManager:
 
     def save(self, model: M) -> None:
         session: OptStrsDict = self._read_session()
-        if not session:
+        if session is None:
             raise IOError(
                 "No session id, (Make sure you initialized the session by calling init_session)"
             )
