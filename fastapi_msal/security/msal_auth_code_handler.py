@@ -1,4 +1,4 @@
-from typing import Optional, Union
+from typing import Optional, Union, List
 
 from msal import SerializableTokenCache  # type: ignore
 from fastapi import Request, HTTPException, status
@@ -113,7 +113,7 @@ class MSALAuthCodeHandler:
     ) -> Optional[AuthToken]:
         cache: SerializableTokenCache = self._load_cache(session=session)
         acc: AsyncConfClient = self.msal_app(cache=cache)
-        accounts: list[LocalAccount] = await acc.get_accounts()
+        accounts: List[LocalAccount] = await acc.get_accounts()
         if accounts and accounts[0] and accounts[0].local_account_id == user_id:
             token: Optional[AuthToken] = await acc.acquire_token_silent(
                 account=accounts[0]

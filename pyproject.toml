@@ -23,7 +23,7 @@ classifiers = [
     "Typing :: Typed",
     "Framework :: AsyncIO",
     "License :: OSI Approved :: MIT License",
-    "Programming Language :: Python :: 3.9"
+    "Programming Language :: Python :: 3.7"
 ]
 requires = [
     "pydantic",
@@ -32,7 +32,7 @@ requires = [
     "msal"
 ]
 description-file = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.7"
 
 [tool.flit.metadata.requires-extra]
 full = [
@@ -66,3 +66,4 @@ extension-pkg-whitelist = "pydantic"
 
 [tool.pylint.format]
 max-line-length = "122"
+max-args = "8"

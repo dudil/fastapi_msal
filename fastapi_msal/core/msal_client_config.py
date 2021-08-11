@@ -20,7 +20,7 @@ class MSALClientConfig(BaseSettings):
     # Optional to set, see MSALPolicies for different options, default is single AAD (B2B)
     policy: MSALPolicies = MSALPolicies.AAD_SINGLE
     # Optional to set - If you are unsure don't set - it will be filled by MSAL as required
-    scopes: StrList = list[str]()
+    scopes: StrList = list()
     # Not in use - for future support
     session_type: str = "filesystem"
 
