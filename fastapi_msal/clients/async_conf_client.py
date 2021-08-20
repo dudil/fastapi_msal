@@ -1,14 +1,12 @@
-import json
 from typing import Optional, TypeVar, Callable, Any, List
-from starlette.concurrency import run_in_threadpool
+
 from msal import ConfidentialClientApplication, SerializableTokenCache  # type: ignore
-from msal.oauth2cli import oidc  # type: ignore
+from starlette.concurrency import run_in_threadpool
 
 from fastapi_msal.core import MSALClientConfig, OptStr, StrsDict, OptStrsDict
 from fastapi_msal.models import (
     AuthCode,
     AuthToken,
-    IDTokenClaims,
     LocalAccount,
     AuthResponse,
 )
@@ -37,20 +35,20 @@ class AsyncConfClient:
         result: T = await run_in_threadpool(func, **kwargs)
         return result
 
-    @staticmethod
-    def decode_id_token(id_token: str) -> Optional[IDTokenClaims]:
-        decoded: OptStrsDict = json.loads(oidc.decode_part(id_token.split(".")[1]))
-        if decoded:
-            return IDTokenClaims.parse_obj(decoded)
-        return None
-
-    async def validate_id_token(
+    async def get_token_claims(
         self, id_token: str, nonce: OptStr = None
-    ) -> IDTokenClaims:
-        token_claims: OptStrsDict = await self.__execute_async__(
+    ) -> dict:
+        """Decodes and validates an id_token and returns its claims as a dictionary.
+        :raises RuntimeError for invalid tokens
+
+        ID token claims would at least contain: "iss", "sub", "aud", "exp", "iat",
+        per `specs <https://openid.net/specs/openid-connect-core-1_0.html#IDToken>`_
+        and it may contain other optional content such as "preferred_username",
+        `maybe more <https://openid.net/specs/openid-connect-core-1_0.html#Claims>`_
+        """
+        return await self.__execute_async__(
             self._cca.client.decode_id_token, id_token=id_token, nonce=nonce
         )
-        return IDTokenClaims.parse_obj(token_claims)
 
     async def get_application_token(
         self, claims_challenge: OptStrsDict = None

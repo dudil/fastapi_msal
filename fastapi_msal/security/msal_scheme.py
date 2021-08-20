@@ -44,8 +44,8 @@ class MSALScheme(SecurityBase):
         scheme, token = get_authorization_scheme_param(authorization)
         if not authorization or scheme.lower() != "bearer":
             raise http_exception
-        token_claims: Optional[IDTokenClaims] = await self.handler.parse_id_token(
-            request=request, token=token, validate=True
+        token_claims: Optional[IDTokenClaims] = await self.handler.get_id_token_claims(
+            request=request, token=token
         )
         if not token_claims:
             raise http_exception

@@ -97,7 +97,7 @@ class MSALAuthorization:
     async def check_authenticated_session(self, request: Request) -> bool:
         auth_token: Optional[AuthToken] = await self.get_session_token(request)
         if auth_token and auth_token.id_token:
-            token_claims = self.handler.parse_id_token(
+            token_claims = self.handler.get_id_token_claims(
                 request=request, token=auth_token
             )
             if token_claims:
