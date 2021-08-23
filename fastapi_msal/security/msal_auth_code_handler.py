@@ -56,28 +56,42 @@ class MSALAuthCodeHandler:
         self._save_cache(session=request.session, cache=cache)
         return auth_token
 
-    async def get_id_token_claims(self, request: Request, token: Union[AuthToken, str]) -> Optional[IDTokenClaims]:
-        if isinstance(token, AuthToken):
-            id_token: str = token.id_token
-        else:
-            id_token = token
+    async def get_id_token_claims(
+        self, request: Request, token: Union[AuthToken, str], validate: bool = True
+    ) -> Optional[IDTokenClaims]:
 
-        claims: Optional[IDTokenClaims] = await self.get_id_claims_from_session(id_token, request)
-        if claims:
-            return claims
+        id_token = token.id_token if isinstance(token, AuthToken) else token
+
+        session_claims: Optional[IDTokenClaims] = await self.get_id_claims_from_session(
+            id_token, request
+        )
+        if session_claims and not validate:
+            return session_claims
 
         try:
-            token_claims = await self.msal_app().get_token_claims(id_token=id_token)
-            return IDTokenClaims.parse_obj(token_claims)
+            claims = (
+                await self.msal_app().get_token_claims(id_token=id_token)
+                if validate
+                else self.msal_app().decode_id_token(id_token=id_token)
+            )
+            if claims:
+                return IDTokenClaims.parse_obj(claims)
         except RuntimeError as e:
-            # raise e and be more specific with http exceptions or:
-            return None
+            # raise e and be more specific with http exceptions or pass and return None
+            pass
+        return None
 
-    async def get_id_claims_from_session(self, id_token, request) -> Optional[IDTokenClaims]:
+    async def get_id_claims_from_session(
+        self, id_token, request
+    ) -> Optional[IDTokenClaims]:
         auth_token: Optional[AuthToken] = await self.get_token_from_session(
             request=request
         )
-        if auth_token and auth_token.id_token == id_token and auth_token.id_token_claims:
+        if (
+            auth_token
+            and auth_token.id_token == id_token
+            and auth_token.id_token_claims
+        ):
             return auth_token.id_token_claims
         return None
 
@@ -106,12 +120,12 @@ class MSALAuthCodeHandler:
             session["token_cache"] = cache.serialize()
 
     def msal_app(
-            self, cache: Optional[SerializableTokenCache] = None
+        self, cache: Optional[SerializableTokenCache] = None
     ) -> AsyncConfClient:
         return AsyncConfClient(client_config=self.client_config, cache=cache)
 
     async def _get_token_from_cache(
-            self, session: StrsDict, user_id: OptStr = None
+        self, session: StrsDict, user_id: OptStr = None
     ) -> Optional[AuthToken]:
         cache: SerializableTokenCache = self._load_cache(session=session)
         acc: AsyncConfClient = self.msal_app(cache=cache)

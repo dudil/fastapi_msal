@@ -1,8 +1,12 @@
+import json
 from typing import Optional, TypeVar, Callable, Any, List
 
 from msal import ConfidentialClientApplication, SerializableTokenCache  # type: ignore
 from starlette.concurrency import run_in_threadpool
 
+from msal.oauth2cli import oidc  # type: ignore
+
+from fastapi_msal import IDTokenClaims
 from fastapi_msal.core import MSALClientConfig, OptStr, StrsDict, OptStrsDict
 from fastapi_msal.models import (
     AuthCode,
@@ -35,9 +39,11 @@ class AsyncConfClient:
         result: T = await run_in_threadpool(func, **kwargs)
         return result
 
-    async def get_token_claims(
-        self, id_token: str, nonce: OptStr = None
-    ) -> dict:
+    @staticmethod
+    def decode_id_token(id_token: str) -> OptStrsDict:
+        return json.loads(oidc.decode_part(id_token.split(".")[1]))
+
+    async def get_token_claims(self, id_token: str, nonce: OptStr = None) -> dict:
         """Decodes and validates an id_token and returns its claims as a dictionary.
         :raises RuntimeError for invalid tokens
 
