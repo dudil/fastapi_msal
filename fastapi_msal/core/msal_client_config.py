@@ -35,6 +35,10 @@ class MSALClientConfig(BaseSettings):
     app_name: OptStr = None
     app_version: OptStr = None
 
+    class Config:
+        env_file = ".env"
+        env_file_encoding = "utf-8"
+
     @property
     def authority(self) -> str:
         if not self.policy:
