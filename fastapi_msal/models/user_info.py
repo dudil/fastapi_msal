@@ -71,3 +71,7 @@ class UserInfo(BaseModel):
     """
     Indicated if this is a new user in the system (following a registration on AAD web part e.g.)
     """
+    groups: Optional[OptStrList] = Field(None, alias="groups")
+    """
+    The user's groups
+    """

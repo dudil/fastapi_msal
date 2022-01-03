@@ -1,7 +1,7 @@
 from typing import Optional
 from datetime import datetime
 from pydantic import BaseModel, Field
-from fastapi_msal.core import OptStr, MSALPolicies
+from fastapi_msal.core import OptStr, OptStrList, MSALPolicies
 from .user_info import UserInfo
 
 
@@ -88,4 +88,8 @@ class IDTokenClaims(UserInfo, AADInternalClaims):
     msal_policy: Optional[MSALPolicies] = Field(None, alias="tfp")
     """
     This is the name of the policy that was used to acquire the token.
+    """
+    groups: OptStrList = Field(None, alias="groups")
+    """
+    The user's groups
     """
