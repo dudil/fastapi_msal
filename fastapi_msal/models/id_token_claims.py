@@ -93,3 +93,7 @@ class IDTokenClaims(UserInfo, AADInternalClaims):
     """
     The user's groups
     """
+    roles: OpStrList = Field(None, alias="roles")
+    """
+    The set of roles that were assigned to the user who is logging in
+    """
