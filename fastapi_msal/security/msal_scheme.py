@@ -15,9 +15,11 @@ class MSALScheme(SecurityBase):
         authorizationUrl: str,
         tokenUrl: str,
         handler: MSALAuthCodeHandler,
+        required_role: Optional[str] = None,
         refreshUrl: Optional[str] = None,
         scopes: Optional[Dict[str, str]] = None,
     ):
+        self.required_role = required_role
         self.handler = handler
         if not scopes:
             scopes = {}
@@ -49,4 +51,15 @@ class MSALScheme(SecurityBase):
         )
         if not token_claims:
             raise http_exception
+        if self.required_role:
+            if not self.authorized(token_claims):
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="Not authorized",
+                    headers={"WWW-Authenticate": "Bearer"},)
         return token_claims
+
+    def authorized(self, token_claims: IDTokenClaims) -> bool:
+        # should we also check the scope?
+        is_authorized = token_claims.roles and self.required_role in token_claims.roles
+        return is_authorized

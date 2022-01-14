@@ -83,7 +83,7 @@ class MSALAuthorization:
         token: AuthToken = await self.handler.authorize_access_token(
             request=request, code=code
         )
-        return BearerToken(access_token=token.id_token)
+        return BearerToken(access_token=token.access_token)
 
     async def _logout_route(
         self, request: Request, referer: OptStr = Header(None)
@@ -104,10 +104,10 @@ class MSALAuthorization:
                 return True
         return False
 
-    @property
-    def scheme(self) -> MSALScheme:
+    def scheme(self, required_role: Optional[str] = None) -> MSALScheme:
         return MSALScheme(
             authorizationUrl=self.router.url_path_for("_login_route"),
             tokenUrl=self.router.url_path_for("_post_token_route"),
             handler=self.handler,
+            required_role=required_role
         )
