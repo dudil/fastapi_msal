@@ -75,7 +75,7 @@ class UserInfo(BaseModel):
     """
     The user's groups
     """
-    roles: OpStrList = Field(None, alias="roles")
+    roles: Optional[OptStrList] = Field(None, alias="roles")
     """
     The user's roles
     """
