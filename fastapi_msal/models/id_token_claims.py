@@ -1,7 +1,7 @@
 from typing import Optional
 from datetime import datetime
 from pydantic import BaseModel, Field
-from fastapi_msal.core import OptStr, MSALPolicies
+from fastapi_msal.core import OptStr, OptStrList, MSALPolicies
 from .user_info import UserInfo
 
 
@@ -23,6 +23,16 @@ class AADInternalClaims(BaseModel):
 
 
 class IDTokenClaims(UserInfo, AADInternalClaims):
+    roles: OptStrList = None
+    """"
+    The set of roles that were assigned to the user who is logging in.
+    """
+
+    scp: OptStr = None
+    """
+    The set of scopes exposed by your application for which the client application has requested (and received) consent.
+    """
+
     exp: Optional[datetime] = None
     """
     The expiration time claim is the time at which the token becomes invalid, represented in epoch time.
