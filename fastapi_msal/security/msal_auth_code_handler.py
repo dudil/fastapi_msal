@@ -79,8 +79,8 @@ class MSALAuthCodeHandler:
             return await self.msal_app().validate_id_token(id_token=id_token)
         return self.msal_app().decode_id_token(id_token=id_token)
 
-    def logout(self, request: Request, callback_url: str) -> RedirectResponse:
-        SessionManager(request=request).clear()
+    async def logout(self, request: Request, callback_url: str) -> RedirectResponse:
+        await SessionManager(request=request).clear()
         logout_url = f"{self.client_config.authority}/oauth2/v2.0/logout?post_logout_redirect_uri={callback_url}"
         return RedirectResponse(url=logout_url)
 

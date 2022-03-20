@@ -89,7 +89,7 @@ class MSALAuthorization:
         self, request: Request, referer: OptStr = Header(None)
     ) -> RedirectResponse:
         callback_url = referer if referer else str(self.return_to_path)
-        return self.handler.logout(request=request, callback_url=callback_url)
+        return await self.handler.logout(request=request, callback_url=callback_url)
 
     async def get_session_token(self, request: Request) -> Optional[AuthToken]:
         return await self.handler.get_token_from_session(request=request)
