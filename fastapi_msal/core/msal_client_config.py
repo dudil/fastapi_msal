@@ -1,5 +1,8 @@
 from enum import Enum
+from pathlib import Path
 from pydantic import BaseSettings
+
+from .session import SessionBackend
 from .utils import OptStr, StrList
 
 
@@ -8,6 +11,11 @@ class MSALPolicies(str, Enum):
     AAD_SINGLE = "AAD_SINGLE"
     B2C_LOGIN = "B2C_1_LOGIN"
     B2C_PROFILE = "B2C_1_PROFILE"
+
+
+class SessionType(str, Enum):
+    IN_MEMORY = "memory"
+    FILE = "filesystem"
 
 
 class MSALClientConfig(BaseSettings):
@@ -21,8 +29,11 @@ class MSALClientConfig(BaseSettings):
     policy: MSALPolicies = MSALPolicies.AAD_SINGLE
     # Optional to set - If you are unsure don't set - it will be filled by MSAL as required
     scopes: StrList = list()
-    # Not in use - for future support
-    session_type: str = "filesystem"
+    # Optional to set - Defaults to in-memory sessions. See SessionType for options
+    session_type: SessionType = SessionType.IN_MEMORY
+    # Optional to set, only used when session_type is filesystem
+    # Specifies the folder path session data is saved
+    session_file_path: Path = Path("session")
 
     # Set the following params if you wish to change the default MSAL Router endpoints
     path_prefix: str = ""
@@ -55,3 +66,16 @@ class MSALClientConfig(BaseSettings):
     @property
     def login_full_path(self) -> str:
         return f"{self.path_prefix}{self.login_path}"
+
+    def make_session_backend(self) -> SessionBackend:
+        if self.session_type is SessionType.IN_MEMORY:
+            from .session.inmemory import InMemorySessionBackend
+
+            return InMemorySessionBackend(self)
+        elif self.session_type is SessionType.FILE:
+            from .session.filesystem import FileSessionBackend
+
+            return FileSessionBackend(self)
+        else:
+            # TODO other backend. sql, redis?
+            raise NotImplementedError()

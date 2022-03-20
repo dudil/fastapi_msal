@@ -1,51 +1,18 @@
 from typing import Optional, TypeVar, Type
-from enum import Enum
-import json
 from pydantic import BaseModel
 from fastapi import Request
+
+from .session import SessionBackend
 from .utils import OptStr, StrsDict, OptStrsDict
 
 M = TypeVar("M", bound=BaseModel)
 SESSION_KEY: str = "sid"
 
 
-class CacheType(Enum):
-    COOKIE = 1
-    IN_MEMORY = 2
-    FILE = 3
-
-
-class CacheManager:
-    cache_db: StrsDict = dict()
-
-    def __init__(self) -> None:
-        pass
-
-    @classmethod
-    async def write(
-        cls, key: str, value: StrsDict
-    ) -> None:  # TODO: make sure we run this one at a time
-        value_json: str = json.dumps(value)
-        cls.cache_db.update({key: value_json})
-
-    @classmethod
-    async def read(
-        cls, key: str
-    ) -> Optional[StrsDict]:  # TODO: make sure we run this one at a time
-        value_json: OptStr = cls.cache_db.get(key, None)
-        if value_json:
-            return json.loads(value_json)
-        return None
-
-    @classmethod
-    async def remove(cls, key: str) -> None:  # TODO: make sure we run this one at a time
-        cls.cache_db.pop(key, None)
-
-
 class SessionManager:
-    def __init__(self, request: Request):
+    def __init__(self, request: Request, backend: SessionBackend):
         self.request = request
-        self.cache_manager = CacheManager
+        self.backend = backend
 
     @property
     def session_id(self) -> OptStr:
@@ -57,7 +24,7 @@ class SessionManager:
     async def _read_session(self) -> OptStrsDict:
         if not self.session_id:
             return None
-        session: OptStrsDict = await self.cache_manager.read(self.session_id)
+        session: OptStrsDict = await self.backend.read(self.session_id)
         if session:
             return session
         return dict()  # return empty session object
@@ -67,7 +34,7 @@ class SessionManager:
             raise IOError(
                 "No session id, (Make sure you initialized the session by calling init_session)"
             )
-        await self.cache_manager.write(key=self.session_id, value=session)
+        await self.backend.write(key=self.session_id, value=session)
 
     async def save(self, model: M) -> None:
         session: OptStrsDict = await self._read_session()
@@ -93,6 +60,6 @@ class SessionManager:
         if not session_id:
             return  # there is no session to clear
         # clear the session object from cache
-        await self.cache_manager.remove(session_id)
+        await self.backend.remove(session_id)
         # clear the session_id from the session cookie
         self.request.session.pop(SESSION_KEY, None)

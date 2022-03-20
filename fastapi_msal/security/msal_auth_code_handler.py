@@ -7,6 +7,7 @@ from starlette.responses import RedirectResponse
 
 from fastapi_msal.clients import AsyncConfClient
 from fastapi_msal.core import MSALClientConfig, OptStr, StrsDict, SessionManager
+from fastapi_msal.core.session import SessionBackend
 from fastapi_msal.models import (
     AuthToken,
     IDTokenClaims,
@@ -19,6 +20,10 @@ from fastapi_msal.models import (
 class MSALAuthCodeHandler:
     def __init__(self, client_config: MSALClientConfig):
         self.client_config: MSALClientConfig = client_config
+        self.session_backend: SessionBackend = self.client_config.make_session_backend()
+
+    def make_session(self, request: Request) -> SessionManager:
+        return SessionManager(request, self.session_backend)
 
     async def authorize_redirect(
         self, request: Request, redirec_uri: str, state: OptStr = None
@@ -26,19 +31,20 @@ class MSALAuthCodeHandler:
         auth_code: AuthCode = await self.msal_app().initiate_auth_flow(
             redirect_uri=redirec_uri, state=state
         )
-        session = SessionManager(request=request)
+        session = self.make_session(request)
         session.init_session(session_id=auth_code.state)
-        await auth_code.save_to_session(session=SessionManager(request=request))
+        await auth_code.save_to_session(session=session)
         return RedirectResponse(auth_code.auth_uri)
 
     async def authorize_access_token(
         self, request: Request, code: str, state: OptStr = None
     ) -> AuthToken:
+        session = self.make_session(request)
         http_exception = HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication Error"
         )
         auth_code: Optional[AuthCode] = await AuthCode.load_from_session(
-            session=SessionManager(request=request)
+            session=session
         )
         if (not auth_code) or (not auth_code.state):
             raise http_exception
@@ -53,7 +59,7 @@ class MSALAuthCodeHandler:
         )
         if auth_token.error or not auth_token.id_token:
             raise http_exception
-        await auth_token.save_to_session(session=SessionManager(request=request))
+        await auth_token.save_to_session(session=session)
         self._save_cache(session=request.session, cache=cache)
         return auth_token
 
@@ -80,14 +86,13 @@ class MSALAuthCodeHandler:
         return self.msal_app().decode_id_token(id_token=id_token)
 
     async def logout(self, request: Request, callback_url: str) -> RedirectResponse:
-        await SessionManager(request=request).clear()
+        await self.make_session(request=request).clear()
         logout_url = f"{self.client_config.authority}/oauth2/v2.0/logout?post_logout_redirect_uri={callback_url}"
         return RedirectResponse(url=logout_url)
 
-    @staticmethod
-    async def get_token_from_session(request: Request) -> Optional[AuthToken]:
+    async def get_token_from_session(self, request: Request) -> Optional[AuthToken]:
         return await AuthToken.load_from_session(
-            session=SessionManager(request=request)
+            session=self.make_session(request=request)
         )
 
     @staticmethod

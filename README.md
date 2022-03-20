@@ -47,6 +47,8 @@ pipenv install "fastapi_msal[full]"
    2. [itsdangerous](https://github.com/pallets/itsdangerous)
    Used by Starlette [session middleware](https://www.starlette.io/middleware/)
 
+   3. [aiofiles](https://pypi.org/project/aiofiles/): Used to save session data to the file system when enabled. FastAPI also uses this library to load static files.
+
 ## Usage
 1. Follow the application [registration process
 with the microsoft identity platform.](https://docs.microsoft.com/azure/active-directory/develop/quickstart-v2-register-an-app)
