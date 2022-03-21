@@ -13,7 +13,7 @@ class MSALPolicies(str, Enum):
     B2C_PROFILE = "B2C_1_PROFILE"
 
 
-class SessionType(str, Enum):
+class MSALSessionType(str, Enum):
     IN_MEMORY = "memory"
     FILE = "filesystem"
 
@@ -30,7 +30,7 @@ class MSALClientConfig(BaseSettings):
     # Optional to set - If you are unsure don't set - it will be filled by MSAL as required
     scopes: StrList = list()
     # Optional to set - Defaults to in-memory sessions. See SessionType for options
-    session_type: SessionType = SessionType.IN_MEMORY
+    session_type: MSALSessionType = MSALSessionType.IN_MEMORY
     # Optional to set, only used when session_type is filesystem
     # Specifies the folder path session data is saved
     session_file_path: Path = Path("session")
@@ -68,11 +68,11 @@ class MSALClientConfig(BaseSettings):
         return f"{self.path_prefix}{self.login_path}"
 
     def make_session_backend(self) -> SessionBackend:
-        if self.session_type is SessionType.IN_MEMORY:
+        if self.session_type is MSALSessionType.IN_MEMORY:
             from .session.inmemory import InMemorySessionBackend
 
             return InMemorySessionBackend(self)
-        elif self.session_type is SessionType.FILE:
+        elif self.session_type is MSALSessionType.FILE:
             from .session.filesystem import FileSessionBackend
 
             return FileSessionBackend(self)
