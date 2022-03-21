@@ -47,11 +47,11 @@ class FileSessionBackend(SessionBackend):
 
 async def readtext(path: Path) -> OptStr:
     if await aiofiles.ospath.exists(path):
-        async with aiofiles.open(path) as f:
+        async with aiofiles.open(path, 'r') as f:
             return await f.read()
     return None
 
 
 async def writetext(path: Path, text: str):
-    async with aiofiles.open(path) as f:
+    async with aiofiles.open(path, 'w') as f:
         await f.write(text)
