@@ -15,10 +15,10 @@ class BaseAuthModel(BaseModel):
         return debug_model
 
     async def save_to_session(self: AuthModel, session: SessionManager) -> None:
-        session.save(self)
+        await session.save(self)
 
     @classmethod
     async def load_from_session(
         cls: Type[AuthModel], session: SessionManager
     ) -> Optional[AuthModel]:
-        return session.load(model_cls=cls)
+        return await session.load(model_cls=cls)

@@ -37,7 +37,8 @@ requires-python = ">=3.7"
 [tool.flit.metadata.requires-extra]
 full = [
     "python-multipart",
-    "itsdangerous"
+    "itsdangerous",
+    "aiofiles"
 ]
 dev = [
     "black",
