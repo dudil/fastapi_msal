@@ -8,6 +8,7 @@ class MSALPolicies(str, Enum):
     AAD_SINGLE = "AAD_SINGLE"
     B2C_LOGIN = "B2C_1_LOGIN"
     B2C_PROFILE = "B2C_1_PROFILE"
+    B2C_CUSTOM = "B2C_1A_LOGIN"
 
 
 class MSALClientConfig(BaseSettings):
@@ -47,6 +48,7 @@ class MSALClientConfig(BaseSettings):
         elif (
             MSALPolicies.B2C_LOGIN == self.policy
             or MSALPolicies.B2C_PROFILE == self.policy
+            or MSALPolicies.B2C_CUSTOM == self.policy
         ):
             authority_url = f"https://{self.tenant}.b2clogin.com/{self.tenant}.onmicrosoft.com/{self.policy}"
 
