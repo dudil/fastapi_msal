@@ -25,6 +25,7 @@ As a result the pacage was built around simplicity and ease of use on the expens
 1. Include a dependency class to authenticate and secure your application APIs
 1. Includes a pydantic setting class for easy and secure configuration from your ENV (or .env or secrets directory)
 1. Full support with FastAPI swagger documentations and authentication simulation
+1. Includes Role-Based Access Control (RBAC) authorization
 
 ## Installation
 
@@ -49,8 +50,9 @@ pipenv install "fastapi_msal[full]"
 
 ## Usage
 1. Follow the application [registration process
-with the microsoft identity platform.](https://docs.microsoft.com/azure/active-directory/develop/quickstart-v2-register-an-app)
-Finishing the processes will allow you to retrieve your app_code and app_credentials (app_secret)
+with the microsoft identity platform](https://docs.microsoft.com/azure/active-directory/develop/quickstart-v2-register-an-app)
+and [expose your API.](https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-configure-app-expose-web-apis)
+Finishing the processes will allow you to retrieve your app_code, app_credentials (app_secret) and your API scope.
 As well as register your app callback path with the platform.
 
 2. Create a new main.py file and add the following lines.
@@ -65,6 +67,7 @@ client_config: MSALClientConfig = MSALClientConfig()
 client_config.client_id = "The Client ID rerived at step #1"
 client_config.client_credential = "The Client secret retrived at step #1"
 client_config.tenant = "Your tenant id"
+client_config.scopes = ["Scope defined by your API (e.g. {client_id}/Read)"]
 
 app = FastAPI()
 app.add_middleware(SessionMiddleware, secret_key="SOME_SSH_KEY_ONLY_YOU_KNOW")  # replace with your own!!!
@@ -73,7 +76,7 @@ app.include_router(msal_auth.router)
 
 
 @app.get("/users/me", response_model=UserInfo, response_model_exclude_none=True, response_model_by_alias=False)
-async def read_users_me(current_user: UserInfo = Depends(msal_auth.scheme)) -> UserInfo:
+async def read_users_me(current_user: UserInfo = Depends(msal_auth.scheme())) -> UserInfo:
     return current_user
 
 
