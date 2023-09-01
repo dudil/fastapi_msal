@@ -23,27 +23,15 @@ classifiers = [
     "Typing :: Typed",
     "Framework :: AsyncIO",
     "License :: OSI Approved :: MIT License",
-    "Programming Language :: Python :: 3.7"
+    "Programming Language :: Python :: 3.7",
 ]
-requires = [
-    "pydantic",
-    "starlette",
-    "fastapi",
-    "msal"
-]
+requires = ["pydantic", "starlette", "fastapi", "msal", "pydantic-settings"]
 description-file = "README.md"
-requires-python = ">=3.7"
+requires-python = ">=3.9"
 
 [tool.flit.metadata.requires-extra]
-full = [
-    "python-multipart",
-    "itsdangerous"
-]
-dev = [
-    "black",
-    "pylint",
-    "mypy"
-]
+full = ["python-multipart", "itsdangerous"]
+dev = ["black", "pylint", "mypy"]
 
 [tool.flit.sdist]
 exclude = ["docs/"]
