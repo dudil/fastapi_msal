@@ -1,3 +1,6 @@
+# This is a patched version compatible with pydantic 2.0
+
+
 # FastAPI/MSAL - MSAL (Microsoft Authentication Library) plugin for FastAPI
 [![Checked with mypy](http://www.mypy-lang.org/static/mypy_badge.svg)](http://mypy-lang.org/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
