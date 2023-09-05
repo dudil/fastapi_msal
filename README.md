@@ -28,11 +28,7 @@ As a result the pacage was built around simplicity and ease of use on the expens
 ## Installation
 
 ```shell
-pip install "fastapi_msal"
-```
-Or if you wish to have all the required packages straight forward
-```shell
-pipenv install "fastapi_msal[full]"
+pip install "fastapi_msal_patched"
 ```
 
 ## Prerequisets
