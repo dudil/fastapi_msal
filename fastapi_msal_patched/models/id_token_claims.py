@@ -1,7 +1,7 @@
 from typing import Optional
 from datetime import datetime
 from pydantic import BaseModel, Field
-from fastapi_msal.core import OptStr, MSALPolicies
+from fastapi_msal_patched.core import OptStr, MSALPolicies
 from .user_info import UserInfo
 
 

@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from fastapi_msal.core import StrsDict, OptStr
+from fastapi_msal_patched.core import StrsDict, OptStr
 
 
 class BearerToken(BaseModel):

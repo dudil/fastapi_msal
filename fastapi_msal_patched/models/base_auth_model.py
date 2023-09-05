@@ -1,6 +1,6 @@
 from typing import Optional, TypeVar, Type
 from pydantic import BaseModel, PrivateAttr
-from fastapi_msal.core import OptStrsDict, StrsDict, SessionManager
+from fastapi_msal_patched.core import OptStrsDict, StrsDict, SessionManager
 
 AuthModel = TypeVar("AuthModel", bound="BaseAuthModel")
 

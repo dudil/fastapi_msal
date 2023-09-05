@@ -4,8 +4,8 @@ from starlette.concurrency import run_in_threadpool
 from msal import ConfidentialClientApplication, SerializableTokenCache  # type: ignore
 from msal.oauth2cli import oidc  # type: ignore
 
-from fastapi_msal.core import MSALClientConfig, OptStr, StrsDict, OptStrsDict
-from fastapi_msal.models import (
+from fastapi_msal_patched.core import MSALClientConfig, OptStr, StrsDict, OptStrsDict
+from fastapi_msal_patched.models import (
     AuthCode,
     AuthToken,
     IDTokenClaims,

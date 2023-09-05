@@ -1,7 +1,7 @@
 from typing import Optional
 from pydantic import BaseModel, Field
 
-from fastapi_msal.core import OptStr, OptStrList
+from fastapi_msal_patched.core import OptStr, OptStrList
 
 
 class UserInfo(BaseModel):

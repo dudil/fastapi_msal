@@ -5,7 +5,7 @@ from fastapi.security.base import SecurityBase
 from fastapi.openapi.models import OAuthFlows as OAuthFlowsModel, SecuritySchemeType
 from fastapi.security.utils import get_authorization_scheme_param
 
-from fastapi_msal.models import IDTokenClaims
+from fastapi_msal_patched.models import IDTokenClaims
 from .msal_auth_code_handler import MSALAuthCodeHandler
 
 

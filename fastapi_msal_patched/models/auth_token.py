@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from typing import Optional
 
-from fastapi_msal.core import OptStr
+from fastapi_msal_patched.core import OptStr
 from .base_auth_model import BaseAuthModel
 from .id_token_claims import IDTokenClaims
 

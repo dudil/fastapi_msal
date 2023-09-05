@@ -5,9 +5,9 @@ from fastapi import Request, HTTPException, status
 
 from starlette.responses import RedirectResponse
 
-from fastapi_msal.clients import AsyncConfClient
-from fastapi_msal.core import MSALClientConfig, OptStr, StrsDict, SessionManager
-from fastapi_msal.models import (
+from fastapi_msal_patched.clients import AsyncConfClient
+from fastapi_msal_patched.core import MSALClientConfig, OptStr, StrsDict, SessionManager
+from fastapi_msal_patched.models import (
     AuthToken,
     IDTokenClaims,
     LocalAccount,

@@ -3,10 +3,10 @@ requires = ["flit"]
 build-backend = "flit.buildapi"
 
 [tool.flit.metadata]
-module = "fastapi_msal"
-author = "Dudi Levy"
-author-email = "dudi@elv8.pro"
-home-page = "https://github.com/dudil/fastapi_msal"
+module = "fastapi_msal_patched"
+author = "yaokai.fu"
+author-email = "yaokai.fu@bota.bio"
+home-page = "https://github.com/yaokaibb/fastapi_msal"
 classifiers = [
     # How mature is this project? Common values are
     #   3 - Alpha
@@ -23,7 +23,7 @@ classifiers = [
     "Typing :: Typed",
     "Framework :: AsyncIO",
     "License :: OSI Approved :: MIT License",
-    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.9",
 ]
 requires = ["pydantic", "starlette", "fastapi", "msal", "pydantic-settings"]
 description-file = "README.md"

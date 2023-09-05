@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from fastapi_msal.core import OptStr
+from fastapi_msal_patched.core import OptStr
 from .base_auth_model import BaseAuthModel
 
 

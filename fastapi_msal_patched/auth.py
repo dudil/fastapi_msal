@@ -4,9 +4,9 @@ from fastapi import APIRouter, Header, Form
 from starlette.requests import Request
 from starlette.responses import RedirectResponse
 
-from fastapi_msal.core import OptStrList, OptStr, MSALClientConfig
-from fastapi_msal.models import AuthToken, BearerToken
-from fastapi_msal.security import MSALAuthCodeHandler, MSALScheme
+from fastapi_msal_patched.core import OptStrList, OptStr, MSALClientConfig
+from fastapi_msal_patched.models import AuthToken, BearerToken
+from fastapi_msal_patched.security import MSALAuthCodeHandler, MSALScheme
 
 
 class MSALAuthorization:
