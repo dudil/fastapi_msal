@@ -1,5 +1,6 @@
 # This is a patched version compatible with pydantic 2.0
 
+# Forked from https://github.com/dudil/fastapi_msal
 
 # FastAPI/MSAL - MSAL (Microsoft Authentication Library) plugin for FastAPI
 FastAPI - https://github.com/tiangolo/fastapi
