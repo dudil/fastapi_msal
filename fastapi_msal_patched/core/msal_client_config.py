@@ -18,9 +18,9 @@ class MSALPolicies(str, Enum):
 class MSALClientConfig(BaseSettings):
     # The following params must be set according to the app registration data recieved from AAD
     # https://docs.microsoft.com/azure/active-directory/develop/quickstart-v2-register-an-app
-    client_id: OptStr
-    client_credential: OptStr
-    tenant: OptStr
+    client_id: OptStr = None
+    client_credential: OptStr = None
+    tenant: OptStr = None
 
     # Optional to set, see MSALPolicies for different options, default is single AAD (B2B)
     policy: MSALPolicies = MSALPolicies.AAD_SINGLE
