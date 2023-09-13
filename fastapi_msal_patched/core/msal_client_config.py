@@ -21,6 +21,7 @@ class MSALClientConfig(BaseSettings):
     client_id: OptStr = None
     client_credential: OptStr = None
     tenant: OptStr = None
+    azure_region: OptStr = None
 
     # Optional to set, see MSALPolicies for different options, default is single AAD (B2B)
     policy: MSALPolicies = MSALPolicies.AAD_SINGLE

@@ -30,6 +30,7 @@ class AsyncConfClient:
             app_name=client_config.app_name,
             app_version=client_config.app_version,
             token_cache=cache,
+            azure_region=client_config.azure_region,
         )
 
     @staticmethod
