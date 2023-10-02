@@ -1,11 +1,14 @@
-from typing import Optional, Dict
-from fastapi import Request, HTTPException, status
-from fastapi.openapi.models import OAuth2 as OAuth2Model, OAuthFlowAuthorizationCode
+from typing import Dict, Optional
+
+from fastapi import HTTPException, Request, status
+from fastapi.openapi.models import OAuth2 as OAuth2Model
+from fastapi.openapi.models import OAuthFlowAuthorizationCode, SecuritySchemeType
+from fastapi.openapi.models import OAuthFlows as OAuthFlowsModel
 from fastapi.security.base import SecurityBase
-from fastapi.openapi.models import OAuthFlows as OAuthFlowsModel, SecuritySchemeType
 from fastapi.security.utils import get_authorization_scheme_param
 
 from fastapi_msal.models import IDTokenClaims
+
 from .msal_auth_code_handler import MSALAuthCodeHandler
 
 
@@ -16,7 +19,7 @@ class MSALScheme(SecurityBase):
         tokenUrl: str,
         handler: MSALAuthCodeHandler,
         refreshUrl: Optional[str] = None,
-        scopes: Optional[Dict[str, str]] = None,
+        scopes: Optional[dict[str, str]] = None,
     ):
         self.handler = handler
         if not scopes:

@@ -1,4 +1,5 @@
 from typing import Optional
+
 from pydantic import BaseModel, Field
 
 from fastapi_msal.core import OptStr, OptStrList

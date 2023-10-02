@@ -4,18 +4,21 @@ import subprocess
 import sys
 from argparse import ArgumentParser
 from pathlib import Path
+
 from python_git_wrapper import Repository  # type: ignore
 
 
 class VersionHandler:
     def __init__(self, version_file: Path):
         if not version_file.is_file():
-            raise FileNotFoundError("Invalid Version File")
+            msg = "Invalid Version File"
+            raise FileNotFoundError(msg)
         self.version_file = version_file
         self.file_content = version_file.read_text()
         match = re.search(r"__version__ *= *\"(\d)\.(\d)\.(\d)\"", self.file_content)
         if not match or len(match.groups()) != 3:
-            raise LookupError("No version line on file")
+            msg = "No version line on file"
+            raise LookupError(msg)
         self.version_line = match[0]
         self.major: int = int(match[1])
         self.minor: int = int(match[2])
@@ -25,9 +28,7 @@ class VersionHandler:
         return f"{self.major}.{self.minor}.{self.build}"
 
     def update_file(self) -> None:
-        new_text = self.file_content.replace(
-            self.version_line, f'__version__ = "{self.__str__()}"'
-        )
+        new_text = self.file_content.replace(self.version_line, f'__version__ = "{self.__str__()}"')
         self.version_file.write_text(new_text)
 
 
@@ -53,7 +54,7 @@ class GitHandler:
             print(f"{u} --- Untracked")
 
     def push_version(self, ver: VersionHandler) -> None:
-        self.repo.commit(message=f"Publish New Package Version: {str(ver)}", add_files=True)
+        self.repo.commit(message=f"Publish New Package Version: {ver!s}", add_files=True)
         self.repo.push()
 
 
@@ -68,7 +69,7 @@ if __name__ == "__main__":
     if args.password:
         os.putenv("FLIT_PASSWORD", args.password)
 
-    git = GitHandler(git_path=Path('.'))
+    git = GitHandler(git_path=Path("."))
     if git.is_dirty():
         print("Git is dirty - please review the following files:")
         git.print_dirty()
@@ -81,8 +82,6 @@ if __name__ == "__main__":
 
     git.push_version(ver=version)
 
-    completed = subprocess.run(
-        ["flit", "publish"], text=True, stderr=subprocess.STDOUT, check=False
-    )
+    completed = subprocess.run(["flit", "publish"], text=True, stderr=subprocess.STDOUT, check=False)
     print(completed.stdout)
     sys.exit(completed.returncode)
