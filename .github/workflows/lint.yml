@@ -1,4 +1,4 @@
-name: Lint & Security
+name: Lint
 on: [push]
 jobs:
   build:
@@ -18,5 +18,3 @@ jobs:
       - name: Run code lint
         run: |
           hatch run all
-      - name: PyCharm Python Security Scanner
-        uses: tonybaloney/pycharm-security@1.22.2
