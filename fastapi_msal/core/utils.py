@@ -1,7 +1,7 @@
-from typing import Optional, List, Dict
+from typing import Optional
 
 OptStr = Optional[str]
-StrList = List[str]
+StrList = list[str]
 OptStrList = Optional[StrList]
-StrsDict = Dict[str, str]
+StrsDict = dict[str, str]
 OptStrsDict = Optional[StrsDict]

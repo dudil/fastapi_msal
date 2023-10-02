@@ -1,12 +1,15 @@
 [build-system]
-requires = ["flit"]
-build-backend = "flit.buildapi"
+requires      = ["hatchling>=1.17.1", "hatch-vcs>=0.3.0"]
+build-backend = "hatchling.build"
 
-[tool.flit.metadata]
-module = "fastapi_msal"
-author = "Dudi Levy"
-author-email = "dudi@elv8.pro"
-home-page = "https://github.com/dudil/fastapi_msal"
+[project]
+name = "fastapi_msal"
+description = "FastAPI MSAL integration for Azure AD modern and fast python based authentication"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.9"
+keywords = ["FastAPI", "MSAL", "SSO", "AAD", "authentication", "plugin", "fastapi-plugin", "fastapi-middleware"]
+authors = [{ name = "Dudi Levy", email = "4785835+dudil@users.noreply.github.com" }]
 classifiers = [
     # How mature is this project? Common values are
     #   3 - Alpha
@@ -23,47 +26,130 @@ classifiers = [
     "Typing :: Typed",
     "Framework :: AsyncIO",
     "License :: OSI Approved :: MIT License",
-    "Programming Language :: Python :: 3.7"
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
 ]
-requires = [
-    "pydantic",
-    "starlette",
-    "fastapi",
-    "msal"
+dependencies = ["pydantic==1.*", "starlette", "fastapi", "msal"]
+dynamic = ["version"]
+
+[project.urls]
+Homepage      = "https://github.com/dudil/fastapi_msal"
+Documentation = "https://github.com/dudil/fastapi_msal#readme"
+Issues        = "https://github.com/dudil/fastapi_msal/issues"
+Source        = "https://github.com/dudil/fastapi_msal"
+
+[tool.hatch.version]
+source = "vcs"
+
+[tool.hatch.version.raw-options]
+version_scheme           = "python-simplified-semver"
+local_scheme             = "no-local-version"
+parentdir_prefix_version = "fastapi_msal-"
+git_describe_command     = ["git", "describe", "--dirty", "--tags", "--long", "--match", "fastapi_msal-v*"]
+
+[tool.hatch.build.hooks.vcs]
+version-file = "fastapi_msal/_version.py"
+
+[tool.hatch.build.targets.sdist]
+exclude = ["docs/", "/.venv/", "/.vscode/", "/.github/", "/.gitignore", "/.gitattributes", "/.git/", "/.idea/"]
+
+[project.optional-dependencies]
+full = ["python-multipart", "itsdangerous"]
+dev  = ["fastapi_msal[full]", "black", "ruff", "mypy", "pytest"]
+
+[tool.hatch.envs.default]
+path         = ".venv"
+dependencies = ["fastapi_msal[dev]"]
+
+[tool.hatch.envs.default.scripts]
+typing = "mypy --install-types --non-interactive {args:fastapi_msal}"
+style  = ["ruff {args:.}", "black --check --diff {args:.}"]
+fmt    = ["black {args:.}", "ruff --fix {args:.}", "style"]
+test   = "pytest {args:tests}"
+all    = ["style", "typing"]
+
+[tool.black]
+target-version            = ["py39"]
+line-length               = 122
+skip-string-normalization = true
+
+[tool.ruff]
+target-version = "py39"
+line-length = 122
+select = [
+    "A",
+    "ARG",
+    "B",
+    "C",
+    "DTZ",
+    "E",
+    "EM",
+    "F",
+    "FBT",
+    "I",
+    "ICN",
+    "ISC",
+    "N",
+    "PLC",
+    "PLE",
+    "PLR",
+    "PLW",
+    "Q",
+    "RUF",
+    "S",
+    "T",
+    "TID",
+    "UP",
+    "W",
+    "YTT",
 ]
-description-file = "README.md"
-requires-python = ">=3.7"
-
-[tool.flit.metadata.requires-extra]
-full = [
-    "python-multipart",
-    "itsdangerous"
+ignore = [
+    # Allow non-abstract empty methods in abstract base classes
+    # "B027",
+    # Allow boolean positional values in function calls, like `dict.get(... True)`
+    # "FBT003",
+    # Ignore checks for possible passwords
+    # "S105", "S106", "S107",
+    # Ignore complexity
+    "PLR0913",
+    # "C901",  "PLR0912", "PLR0911", "PLR0915",
+    # Ignore print in code
+    "T201",
 ]
-dev = [
-    "black",
-    "pylint",
-    "mypy"
+unfixable = [
+    # Don't touch unused imports
+    "F401",
 ]
+ignore-init-module-imports = true
 
-[tool.flit.sdist]
-exclude = ["docs/"]
+[tool.ruff.per-file-ignores]
+# avoid warnings related to __init__.py files imports
+"__init__.py" = ["PLC0414"]
+
+# Tests can use magic values, assertions, and relative imports
+"tests/**/*" = ["PLR2004", "S101", "TID252"]
+
+[tool.ruff.isort]
+known-first-party = ["fastapi_msal"]
+
+[tool.mypy]
+plugins = ["pydantic.mypy"]
+
+follow_imports        = "silent"
+warn_redundant_casts  = true
+warn_unused_ignores   = true
+disallow_any_generics = true
+check_untyped_defs    = true
+no_implicit_reexport  = true
+
+ignore_missing_imports = true
+strict                 = true
+disallow_untyped_defs  = true
 
 
-[tool.pylint.master]
-fail-under = "9.5"
-suggestion-mode = "yes"
-
-[tool.pylint.messages_control]
-disable = """
-            C0330, C0326,
-            missing-class-docstring,
-            missing-function-docstring,
-            missing-module-docstring,
-            invalid-name,
-            too-few-public-methods,
-"""
-extension-pkg-whitelist = "pydantic"
-
-[tool.pylint.format]
-max-line-length = "122"
-max-args = "8"
+[tool.pydantic-mypy]
+init_forbid_extra             = true
+init_typed                    = true
+warn_required_dynamic_aliases = true
+warn_untyped_fields           = true

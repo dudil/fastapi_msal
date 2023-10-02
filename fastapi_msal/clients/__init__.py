@@ -1,1 +1,1 @@
-from .async_conf_client import AsyncConfClient
+from .async_conf_client import AsyncConfClient as AsyncConfClient

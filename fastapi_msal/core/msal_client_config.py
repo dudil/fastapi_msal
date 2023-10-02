@@ -1,5 +1,7 @@
 from enum import Enum
+
 from pydantic import BaseSettings
+
 from .utils import OptStr, StrList
 
 
@@ -21,7 +23,7 @@ class MSALClientConfig(BaseSettings):
     # Optional to set, see MSALPolicies for different options, default is single AAD (B2B)
     policy: MSALPolicies = MSALPolicies.AAD_SINGLE
     # Optional to set - If you are unsure don't set - it will be filled by MSAL as required
-    scopes: StrList = list()
+    scopes: StrList = []
     # Not in use - for future support
     session_type: str = "filesystem"
 
@@ -39,17 +41,20 @@ class MSALClientConfig(BaseSettings):
     @property
     def authority(self) -> str:
         if not self.policy:
-            raise ValueError("Policy must be specificly set before use")
+            msg = "Policy must be specificly set before use"
+            raise ValueError(msg)
         authority_url: str = ""
         if MSALPolicies.AAD_SINGLE == self.policy:
             authority_url = f"https://login.microsoftonline.com/{self.tenant}"
         elif MSALPolicies.AAD_MULTI == self.policy:
             authority_url = "https://login.microsoftonline.com/common/"
-        elif (
-            MSALPolicies.B2C_LOGIN == self.policy
-            or MSALPolicies.B2C_PROFILE == self.policy
-            or MSALPolicies.B2C_CUSTOM == self.policy
-        ):
+        elif self.policy not in {
+            MSALPolicies.AAD_SINGLE,
+            MSALPolicies.AAD_MULTI,
+            MSALPolicies.B2C_LOGIN,
+            MSALPolicies.B2C_PROFILE,
+            MSALPolicies.B2C_CUSTOM,
+        }:
             authority_url = f"https://{self.tenant}.b2clogin.com/{self.tenant}.onmicrosoft.com/{self.policy}"
 
         return authority_url

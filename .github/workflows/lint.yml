@@ -1,23 +1,20 @@
-name: Lint & Security
+name: Lint
 on: [push]
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.10", "3.11"]
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python 3.9
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.9
-    - name: Install Requirements
-      run: |
-        python -m pip install --upgrade flit
-        flit install
-    - name: Run Pylint
-      run: |
-        pylint fastapi_msal
-    - name: Run MyPy
-      run: |
-        mypy fastapi_msal
-    - name: PyCharm Python Security Scanner
-      uses: tonybaloney/pycharm-security@1.22.2
+      - uses: actions/checkout@v3
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip hatch
+      - name: Run code lint
+        run: |
+          hatch run all
