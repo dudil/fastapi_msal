@@ -1,4 +1,3 @@
-from enum import Enum
 from typing import Optional
 
 from fastapi import APIRouter, Form, Header
@@ -15,7 +14,7 @@ class MSALAuthorization:
         self,
         client_config: MSALClientConfig,
         return_to_path: str = "/",
-        tags: list[str | Enum] | None = None,
+        tags: Optional[list[str]] = None,  # type: ignore
     ):
         self.handler = MSALAuthCodeHandler(client_config=client_config)
         if not tags:
