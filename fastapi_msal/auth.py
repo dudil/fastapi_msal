@@ -14,13 +14,13 @@ class MSALAuthorization:
         self,
         client_config: MSALClientConfig,
         return_to_path: str = "/",
-        tags: Optional[list[str]] = None,  # type: ignore
+        tags: Optional[list[str]] = None,  # type: ignore [unused-ignore]
     ):
         self.handler = MSALAuthCodeHandler(client_config=client_config)
         if not tags:
             tags = ["authentication"]
         self.return_to_path = return_to_path
-        self.router = APIRouter(prefix=client_config.path_prefix, tags=tags)
+        self.router = APIRouter(prefix=client_config.path_prefix, tags=tags)  # type: ignore
         self.router.add_api_route(
             name="_login_route",
             path=client_config.login_path,
