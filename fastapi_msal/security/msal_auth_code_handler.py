@@ -1,4 +1,4 @@
-from typing import List, Optional, Union
+from typing import Optional, Union
 
 from fastapi import HTTPException, Request, status
 from msal import SerializableTokenCache  # type: ignore
@@ -46,7 +46,7 @@ class MSALAuthCodeHandler:
 
     # TODO: needs rewrite of method, probably seperate into 2 different methods
     async def parse_id_token(
-        self, request: Request, token: Union[AuthToken, str], validate: bool = True
+        self, *, request: Request, token: Union[AuthToken, str], validate: bool = True
     ) -> Optional[IDTokenClaims]:
         if isinstance(token, AuthToken):
             id_token: str = token.id_token

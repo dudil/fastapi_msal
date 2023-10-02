@@ -1,4 +1,4 @@
-from typing import Optional, Type, TypeVar
+from typing import Optional, TypeVar
 
 from pydantic import BaseModel, PrivateAttr
 

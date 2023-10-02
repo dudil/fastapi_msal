@@ -48,11 +48,13 @@ class MSALClientConfig(BaseSettings):
             authority_url = f"https://login.microsoftonline.com/{self.tenant}"
         elif MSALPolicies.AAD_MULTI == self.policy:
             authority_url = "https://login.microsoftonline.com/common/"
-        elif (
-            MSALPolicies.B2C_LOGIN == self.policy
-            or MSALPolicies.B2C_PROFILE == self.policy
-            or MSALPolicies.B2C_CUSTOM == self.policy
-        ):
+        elif self.policy not in {
+            MSALPolicies.AAD_SINGLE,
+            MSALPolicies.AAD_MULTI,
+            MSALPolicies.B2C_LOGIN,
+            MSALPolicies.B2C_PROFILE,
+            MSALPolicies.B2C_CUSTOM,
+        }:
             authority_url = f"https://{self.tenant}.b2clogin.com/{self.tenant}.onmicrosoft.com/{self.policy}"
 
         return authority_url

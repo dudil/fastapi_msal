@@ -1,5 +1,5 @@
 import json
-from typing import Any, Callable, List, Optional, TypeVar
+from typing import Any, Callable, Optional, TypeVar
 
 from msal import ConfidentialClientApplication, SerializableTokenCache  # type: ignore
 from msal.oauth2cli import oidc  # type: ignore
@@ -108,6 +108,7 @@ class AsyncConfClient:
 
     async def acquire_token_silent(
         self,
+        *,
         account: Optional[LocalAccount],
         authority: OptStr = None,
         force_refresh: Optional[bool] = False,

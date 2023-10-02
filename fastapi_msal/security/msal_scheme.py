@@ -1,4 +1,4 @@
-from typing import Dict, Optional
+from typing import Optional
 
 from fastapi import HTTPException, Request, status
 from fastapi.openapi.models import OAuth2 as OAuth2Model
@@ -15,10 +15,10 @@ from .msal_auth_code_handler import MSALAuthCodeHandler
 class MSALScheme(SecurityBase):
     def __init__(
         self,
-        authorizationUrl: str,
-        tokenUrl: str,
+        authorization_url: str,
+        token_url: str,
         handler: MSALAuthCodeHandler,
-        refreshUrl: Optional[str] = None,
+        refresh_url: Optional[str] = None,
         scopes: Optional[dict[str, str]] = None,
     ):
         self.handler = handler
@@ -28,10 +28,10 @@ class MSALScheme(SecurityBase):
 
         flows = OAuthFlowsModel(
             authorizationCode=OAuthFlowAuthorizationCode(
-                authorizationUrl=authorizationUrl,
-                tokenUrl=tokenUrl,
+                authorizationUrl=authorization_url,
+                tokenUrl=token_url,
                 scopes=scopes,
-                refreshUrl=refreshUrl,
+                refreshUrl=refresh_url,
             )
         )
         # needs further investigation (type...)

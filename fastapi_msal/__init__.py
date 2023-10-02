@@ -5,7 +5,7 @@ FastAPI - https://github.com/tiangolo/fastapi
 MSAL for Python - https://github.com/AzureAD/microsoft-authentication-library-for-python
 """
 
-__version__ = "0.1.7"
-from .auth import MSALAuthorization
-from .core import MSALClientConfig
-from .models import IDTokenClaims, UserInfo
+from .auth import MSALAuthorization as MSALAuthorization
+from .core import MSALClientConfig as MSALClientConfig
+from .models import IDTokenClaims as IDTokenClaims
+from .models import UserInfo as UserInfo

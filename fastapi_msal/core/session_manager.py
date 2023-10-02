@@ -1,6 +1,6 @@
 import json
 from enum import Enum
-from typing import Optional, Type, TypeVar
+from typing import ClassVar, Optional, TypeVar
 
 from fastapi import Request
 from pydantic import BaseModel
@@ -18,7 +18,7 @@ class CacheType(Enum):
 
 
 class CacheManager:
-    cache_db: StrsDict = {}
+    cache_db: ClassVar[StrsDict] = {}
 
     def __init__(self) -> None:
         pass

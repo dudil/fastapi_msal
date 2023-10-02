@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional
+from typing import Optional
 
 OptStr = Optional[str]
 StrList = list[str]
