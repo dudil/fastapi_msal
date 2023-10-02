@@ -1,10 +1,10 @@
 from typing import Optional
 
-from fastapi import APIRouter, Header, Form
+from fastapi import APIRouter, Form, Header
 from starlette.requests import Request
 from starlette.responses import RedirectResponse
 
-from fastapi_msal.core import OptStrList, OptStr, MSALClientConfig
+from fastapi_msal.core import MSALClientConfig, OptStr, OptStrList
 from fastapi_msal.models import AuthToken, BearerToken
 from fastapi_msal.security import MSALAuthCodeHandler, MSALScheme
 
@@ -63,31 +63,17 @@ class MSALAuthorization:
             print(client_id)
         if not redirect_uri:
             redirect_uri = request.url_for("_get_token_route")
-        return await self.handler.authorize_redirect(
-            request=request, redirec_uri=redirect_uri, state=state
-        )
+        return await self.handler.authorize_redirect(request=request, redirec_uri=redirect_uri, state=state)
 
-    async def _get_token_route(
-        self, request: Request, code: str, state: Optional[str]
-    ) -> RedirectResponse:
-        await self.handler.authorize_access_token(
-            request=request, code=code, state=state
-        )
-        return RedirectResponse(
-            url=f"{self.return_to_path}", headers=dict(request.headers.items())
-        )
+    async def _get_token_route(self, request: Request, code: str, state: Optional[str]) -> RedirectResponse:
+        await self.handler.authorize_access_token(request=request, code=code, state=state)
+        return RedirectResponse(url=f"{self.return_to_path}", headers=dict(request.headers.items()))
 
-    async def _post_token_route(
-        self, request: Request, code: str = Form(...)
-    ) -> BearerToken:
-        token: AuthToken = await self.handler.authorize_access_token(
-            request=request, code=code
-        )
+    async def _post_token_route(self, request: Request, code: str = Form(...)) -> BearerToken:
+        token: AuthToken = await self.handler.authorize_access_token(request=request, code=code)
         return BearerToken(access_token=token.id_token)
 
-    async def _logout_route(
-        self, request: Request, referer: OptStr = Header(None)
-    ) -> RedirectResponse:
+    async def _logout_route(self, request: Request, referer: OptStr = Header(None)) -> RedirectResponse:
         callback_url = referer if referer else str(self.return_to_path)
         return self.handler.logout(request=request, callback_url=callback_url)
 
@@ -97,9 +83,7 @@ class MSALAuthorization:
     async def check_authenticated_session(self, request: Request) -> bool:
         auth_token: Optional[AuthToken] = await self.get_session_token(request)
         if auth_token and auth_token.id_token:
-            token_claims = self.handler.parse_id_token(
-                request=request, token=auth_token
-            )
+            token_claims = self.handler.parse_id_token(request=request, token=auth_token)
             if token_claims:
                 return True
         return False
