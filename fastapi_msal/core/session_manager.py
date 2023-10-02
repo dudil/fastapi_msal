@@ -32,7 +32,7 @@ class CacheManager:
     def read(cls, key: str) -> Optional[StrsDict]:  # TODO: make sure we run this one at a time
         value_json: OptStr = cls.cache_db.get(key, None)
         if value_json:
-            return json.loads(value_json)
+            return json.loads(value_json)  # type: ignore
         return None
 
     @classmethod

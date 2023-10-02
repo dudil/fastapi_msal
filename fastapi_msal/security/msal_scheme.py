@@ -43,7 +43,7 @@ class MSALScheme(SecurityBase):
             detail="Not authenticated",
             headers={"WWW-Authenticate": "Bearer"},
         )
-        authorization: str = request.headers.get("Authorization")
+        authorization: Optional[str] = request.headers.get("Authorization")
         scheme, token = get_authorization_scheme_param(authorization)
         if not authorization or scheme.lower() != "bearer":
             raise http_exception

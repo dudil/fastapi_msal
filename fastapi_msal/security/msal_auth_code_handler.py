@@ -1,7 +1,7 @@
 from typing import Optional, Union
 
 from fastapi import HTTPException, Request, status
-from msal import SerializableTokenCache  # type: ignore
+from msal import SerializableTokenCache
 from starlette.responses import RedirectResponse
 
 from fastapi_msal.clients import AsyncConfClient

@@ -30,7 +30,7 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
 ]
-dependencies = ["pydantic", "starlette", "fastapi", "msal"]
+dependencies = ["pydantic==1.*", "starlette", "fastapi", "msal"]
 dynamic = ["version"]
 
 [project.urls]

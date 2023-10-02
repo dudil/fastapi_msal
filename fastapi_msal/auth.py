@@ -1,10 +1,11 @@
+from enum import Enum
 from typing import Optional
 
 from fastapi import APIRouter, Form, Header
 from starlette.requests import Request
 from starlette.responses import RedirectResponse
 
-from fastapi_msal.core import MSALClientConfig, OptStr, OptStrList
+from fastapi_msal.core import MSALClientConfig, OptStr
 from fastapi_msal.models import AuthToken, BearerToken
 from fastapi_msal.security import MSALAuthCodeHandler, MSALScheme
 
@@ -14,7 +15,7 @@ class MSALAuthorization:
         self,
         client_config: MSALClientConfig,
         return_to_path: str = "/",
-        tags: OptStrList = None,
+        tags: list[str | Enum] | None = None,
     ):
         self.handler = MSALAuthCodeHandler(client_config=client_config)
         if not tags:
@@ -62,7 +63,7 @@ class MSALAuthorization:
         if client_id:
             print(client_id)
         if not redirect_uri:
-            redirect_uri = request.url_for("_get_token_route")
+            redirect_uri = str(request.url_for("_get_token_route"))
         return await self.handler.authorize_redirect(request=request, redirec_uri=redirect_uri, state=state)
 
     async def _get_token_route(self, request: Request, code: str, state: Optional[str]) -> RedirectResponse:
@@ -91,7 +92,7 @@ class MSALAuthorization:
     @property
     def scheme(self) -> MSALScheme:
         return MSALScheme(
-            authorizationUrl=self.router.url_path_for("_login_route"),
+            authorization_url=self.router.url_path_for("_login_route"),
             token_url=self.router.url_path_for("_post_token_route"),
             handler=self.handler,
         )

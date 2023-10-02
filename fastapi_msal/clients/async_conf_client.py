@@ -1,8 +1,8 @@
 import json
 from typing import Any, Callable, Optional, TypeVar
 
-from msal import ConfidentialClientApplication, SerializableTokenCache  # type: ignore
-from msal.oauth2cli import oidc  # type: ignore
+from msal import ConfidentialClientApplication, SerializableTokenCache
+from msal.oauth2cli import oidc
 from starlette.concurrency import run_in_threadpool
 
 from fastapi_msal.core import MSALClientConfig, OptStr, OptStrsDict, StrsDict
