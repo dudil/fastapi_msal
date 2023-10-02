@@ -63,7 +63,7 @@ path         = ".venv"
 dependencies = ["fastapi_msal[dev]"]
 
 [tool.hatch.envs.default.scripts]
-typing = "mypy --install-types --non-interactive {args:osp}"
+typing = "mypy --install-types --non-interactive {args:fastapi_msal}"
 style  = ["ruff {args:.}", "black --check --diff {args:.}"]
 fmt    = ["black {args:.}", "ruff --fix {args:.}", "style"]
 test   = "pytest {args:tests}"
@@ -131,7 +131,7 @@ ignore-init-module-imports = true
 "tests/**/*" = ["PLR2004", "S101", "TID252"]
 
 [tool.ruff.isort]
-known-first-party = ["osp"]
+known-first-party = ["fastapi_msal"]
 
 [tool.mypy]
 plugins = ["pydantic.mypy"]
