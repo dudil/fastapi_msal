@@ -43,10 +43,9 @@ Source        = "https://github.com/dudil/fastapi_msal"
 source = "vcs"
 
 [tool.hatch.version.raw-options]
-version_scheme           = "python-simplified-semver"
-local_scheme             = "no-local-version"
-parentdir_prefix_version = "fastapi_msal-"
-git_describe_command     = ["git", "describe", "--dirty", "--tags", "--long", "--match", "fastapi_msal-v*"]
+version_scheme       = "python-simplified-semver"
+local_scheme         = "no-local-version"
+git_describe_command = ["git", "describe", "--tags", "--long", "--match", "*"]
 
 [tool.hatch.build.hooks.vcs]
 version-file = "fastapi_msal/_version.py"
