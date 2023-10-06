@@ -69,12 +69,10 @@ test   = "pytest {args:tests}"
 all    = ["style", "typing"]
 
 [tool.black]
-target-version            = ["py39"]
 line-length               = 122
 skip-string-normalization = true
 
 [tool.ruff]
-target-version = "py39"
 line-length = 122
 select = [
     "A",
