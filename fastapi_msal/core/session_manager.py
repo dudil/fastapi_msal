@@ -71,7 +71,7 @@ class SessionManager:
         if session is None:
             msg = "No session id, (Make sure you initialized the session by calling init_session)"
             raise OSError(msg)
-        session.update({model.__repr_name__(): model.model_dump_json(exclude_none=True, by_alias=True)})
+        session.update({model.__repr_name__(): model.model_dump_json(exclude_none=True, by_alias=True)})  # type: ignore
         self._write_session(session=session)
 
     def load(self, model_cls: type[M]) -> Optional[M]:

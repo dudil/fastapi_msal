@@ -92,14 +92,14 @@ class AsyncConfClient:
     async def finalize_auth_flow(self, auth_code_flow: AuthCode, auth_response: AuthResponse) -> AuthToken:
         auth_token: StrsDict = await self.__execute_async__(
             self._cca.acquire_token_by_auth_code_flow,
-            auth_code_flow=auth_code_flow.dict(exclude_none=True),
-            auth_response=auth_response.dict(exclude_none=True),
+            auth_code_flow=auth_code_flow.model_dump(exclude_none=True),
+            auth_response=auth_response.model_dump(exclude_none=True),
             scopes=self.client_config.scopes,
         )
         return AuthToken.parse_obj_debug(to_parse=auth_token)
 
     async def remove_account(self, account: LocalAccount) -> None:
-        await self.__execute_async__(self._cca.remove_account, account=account.dict(exclude_none=True))
+        await self.__execute_async__(self._cca.remove_account, account=account.model_dump(exclude_none=True))
 
     async def get_accounts(self, username: OptStr = None) -> list[LocalAccount]:
         accounts_objects: list[StrsDict] = await self.__execute_async__(self._cca.get_accounts, username=username)
