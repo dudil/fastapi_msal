@@ -71,7 +71,7 @@ class SessionManager:
         if session is None:
             msg = "No session id, (Make sure you initialized the session by calling init_session)"
             raise OSError(msg)
-        session.update({model.__repr_name__(): model.json(exclude_none=True, by_alias=True)})
+        session.update({model.__repr_name__(): model.model_dump_json(exclude_none=True, by_alias=True)})  # type: ignore
         self._write_session(session=session)
 
     def load(self, model_cls: type[M]) -> Optional[M]:
@@ -79,7 +79,7 @@ class SessionManager:
         if session:
             raw_model: OptStr = session.get(model_cls.__name__, None)
             if raw_model:
-                return model_cls.parse_raw(raw_model)
+                return model_cls.model_validate_json(raw_model)
         return None
 
     def clear(self) -> None:

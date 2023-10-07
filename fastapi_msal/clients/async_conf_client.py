@@ -42,14 +42,14 @@ class AsyncConfClient:
     def decode_id_token(id_token: str) -> Optional[IDTokenClaims]:
         decoded: OptStrsDict = json.loads(oidc.decode_part(id_token.split(".")[1]))
         if decoded:
-            return IDTokenClaims.parse_obj(decoded)
+            return IDTokenClaims.model_validate(decoded)
         return None
 
     async def validate_id_token(self, id_token: str, nonce: OptStr = None) -> IDTokenClaims:
         token_claims: OptStrsDict = await self.__execute_async__(
             self._cca.client.decode_id_token, id_token=id_token, nonce=nonce
         )
-        return IDTokenClaims.parse_obj(token_claims)
+        return IDTokenClaims.model_validate(token_claims)
 
     async def get_application_token(self, claims_challenge: OptStrsDict = None) -> AuthToken:
         token: StrsDict = await self.__execute_async__(
@@ -92,14 +92,14 @@ class AsyncConfClient:
     async def finalize_auth_flow(self, auth_code_flow: AuthCode, auth_response: AuthResponse) -> AuthToken:
         auth_token: StrsDict = await self.__execute_async__(
             self._cca.acquire_token_by_auth_code_flow,
-            auth_code_flow=auth_code_flow.dict(exclude_none=True),
-            auth_response=auth_response.dict(exclude_none=True),
+            auth_code_flow=auth_code_flow.model_dump(exclude_none=True),
+            auth_response=auth_response.model_dump(exclude_none=True),
             scopes=self.client_config.scopes,
         )
         return AuthToken.parse_obj_debug(to_parse=auth_token)
 
     async def remove_account(self, account: LocalAccount) -> None:
-        await self.__execute_async__(self._cca.remove_account, account=account.dict(exclude_none=True))
+        await self.__execute_async__(self._cca.remove_account, account=account.model_dump(exclude_none=True))
 
     async def get_accounts(self, username: OptStr = None) -> list[LocalAccount]:
         accounts_objects: list[StrsDict] = await self.__execute_async__(self._cca.get_accounts, username=username)
@@ -117,7 +117,7 @@ class AsyncConfClient:
         token = await self.__execute_async__(
             self._cca.acquire_token_silent,
             scopes=self.client_config.scopes,
-            account=(account.dict(exclude_none=True) if account else None),
+            account=(account.model_dump(exclude_none=True) if account else None),
             authority=authority,
             force_refresh=force_refresh,
             claims_challenge=claims_challenge,

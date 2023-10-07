@@ -12,7 +12,7 @@ class BaseAuthModel(BaseModel):
 
     @classmethod
     def parse_obj_debug(cls: type[AuthModel], to_parse: StrsDict) -> AuthModel:
-        debug_model: AuthModel = cls.parse_obj(obj=to_parse)
+        debug_model: AuthModel = cls.model_validate(obj=to_parse)
         debug_model.__setattr__("_recieved", to_parse)
         return debug_model
 
