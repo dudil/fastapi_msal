@@ -1,8 +1,9 @@
 from enum import Enum
+from typing import ClassVar
 
-from pydantic import BaseSettings
+from pydantic_settings import BaseSettings
 
-from .utils import OptStr, StrList
+from .utils import OptStr
 
 
 class MSALPolicies(str, Enum):
@@ -23,7 +24,7 @@ class MSALClientConfig(BaseSettings):
     # Optional to set, see MSALPolicies for different options, default is single AAD (B2B)
     policy: MSALPolicies = MSALPolicies.AAD_SINGLE
     # Optional to set - If you are unsure don't set - it will be filled by MSAL as required
-    scopes: StrList = []
+    scopes: ClassVar[list[str]] = []
     # Not in use - for future support
     session_type: str = "filesystem"
 
