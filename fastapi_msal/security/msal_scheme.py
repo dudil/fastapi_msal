@@ -20,6 +20,7 @@ class MSALScheme(SecurityBase):
         handler: MSALAuthCodeHandler,
         refresh_url: Optional[str] = None,
         scopes: Optional[dict[str, str]] = None,
+        accepted_roles: Optional[Union[str, list[str]]] = None,
     ):
         self.handler = handler
         if not scopes:
@@ -36,6 +37,7 @@ class MSALScheme(SecurityBase):
         )
         # needs further investigation (type...)
         self.model = OAuth2Model(flows=flows, type=SecuritySchemeType.oauth2)
+        self.accepted_roles = accepted_roles
 
     async def __call__(self, request: Request) -> IDTokenClaims:
         http_exception = HTTPException(
@@ -47,9 +49,30 @@ class MSALScheme(SecurityBase):
         scheme, token = get_authorization_scheme_param(authorization)
         if not authorization or scheme.lower() != "bearer":
             raise http_exception
-        token_claims: Optional[IDTokenClaims] = await self.handler.parse_id_token(
-            request=request, token=token, validate=True
-        )
+        try:
+            token_claims: Optional[IDTokenClaims] = await self.handler.parse_id_token(
+                request=request, token=token, validate=True
+            )
+        except Exception as e:
+            http_exception.detail = str(e)
+            raise http_exception
         if not token_claims:
             raise http_exception
+
+        # If accepted roles were indicated we ensure at least one is present
+        if self.accepted_roles:
+            accepted = self.accepted_roles
+            if isinstance(accepted, str):
+                accepted = [accepted]
+            rbac_exec = HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail=f"Not authorized - one of {','.join(accepted)} roles required",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+            if roles := token_claims.roles:
+                if not set(roles).intersection(accepted):
+                    raise rbac_exec
+            else:
+                raise rbac_exec
+        # else we don't perform rbac and accept the token
         return token_claims
