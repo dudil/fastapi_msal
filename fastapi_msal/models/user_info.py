@@ -72,3 +72,10 @@ class UserInfo(BaseModel):
     """
     Indicated if this is a new user in the system (following a registration on AAD web part e.g.)
     """
+
+    roles: Optional[list[str]] = Field([])
+    """
+    The roles claim if its present - list of strings, each indicating a role assigned to the user
+    https://learn.microsoft.com/en-us/azure/active-directory/develop/howto-add-app-roles-in-apps
+    """
+
