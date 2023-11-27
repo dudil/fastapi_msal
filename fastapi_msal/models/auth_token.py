@@ -8,7 +8,7 @@ from .id_token_claims import IDTokenClaims
 
 
 class AuthToken(BaseAuthModel):
-    id_token: str
+    id_token: OptStr = None
     """
     A JSON Web Token (JWT).
     The app can decode the segments of this token to request information about the user who signed in.

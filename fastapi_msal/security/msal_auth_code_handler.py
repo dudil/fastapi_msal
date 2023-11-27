@@ -39,6 +39,8 @@ class MSALAuthCodeHandler:
             auth_code_flow=auth_code, auth_response=auth_response
         )
         if auth_token.error or not auth_token.id_token:
+            if auth_token.error_description:
+                http_exception.detail = f"{auth_token.error}: {auth_token.error_description}"
             raise http_exception
         await auth_token.save_to_session(session=SessionManager(request=request))
         self._save_cache(session=request.session, cache=cache)
