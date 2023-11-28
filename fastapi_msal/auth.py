@@ -95,3 +95,14 @@ class MSALAuthorization:
             token_url=self.router.url_path_for("_post_token_route"),
             handler=self.handler,
         )
+
+    def rbac_allow(self, accepted_roles: Optional[Union[str, list[str]]] = None) -> MSALScheme:
+        """
+        :param accepted_roles: list of roles to accept (at least one is required)  
+        """
+        return MSALScheme(
+            authorization_url=self.router.url_path_for("_login_route"),
+            token_url=self.router.url_path_for("_post_token_route"),
+            handler=self.handler,
+            accepted_roles=accepted_roles,
+        )
