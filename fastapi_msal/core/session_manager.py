@@ -47,7 +47,7 @@ class SessionManager:
 
     @property
     def session_id(self) -> OptStr:
-        return self.request.session.get(SESSION_KEY, None)
+        return str(self.request.session.get(SESSION_KEY, None))
 
     def init_session(self, session_id: str) -> None:
         self.request.session.update({SESSION_KEY: session_id})
