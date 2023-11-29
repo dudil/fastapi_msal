@@ -7,7 +7,7 @@ from fastapi.openapi.models import OAuthFlows as OAuthFlowsModel
 from fastapi.security.base import SecurityBase
 from fastapi.security.utils import get_authorization_scheme_param
 
-from fastapi_msal.models import IDTokenClaims
+from fastapi_msal.models import AuthToken, IDTokenClaims
 
 from .msal_auth_code_handler import MSALAuthCodeHandler
 
@@ -45,11 +45,14 @@ class MSALScheme(SecurityBase):
         )
         authorization: Optional[str] = request.headers.get("Authorization")
         scheme, token = get_authorization_scheme_param(authorization)
-        if not authorization or scheme.lower() != "bearer":
-            raise http_exception
-        token_claims: Optional[IDTokenClaims] = await self.handler.parse_id_token(
-            request=request, token=token, validate=True
-        )
+        token_claims: Optional[IDTokenClaims] = None
+        if authorization and scheme.lower() != "bearer":
+            token_claims = await self.handler.parse_id_token(request=request, token=token, validate=True)
+        else:
+            session_token: Optional[AuthToken] = await self.handler.get_token_from_session(request=request)
+            if session_token:
+                token_claims = session_token.id_token_claims
+
         if not token_claims:
             raise http_exception
         return token_claims
