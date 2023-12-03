@@ -46,14 +46,11 @@ class MSALAuthCodeHandler:
         self._save_cache(session=request.session, cache=cache)
         return auth_token
 
-    async def parse_id_token(self, *, request: Request, token: Union[AuthToken, str]) -> Optional[IDTokenClaims]:
+    async def parse_id_token(self, *, token: Union[AuthToken, str]) -> Optional[IDTokenClaims]:
         if isinstance(token, AuthToken):
             id_token: str = token.id_token
         else:
             id_token = token
-        auth_token: Optional[AuthToken] = await self.get_token_from_session(request=request)
-        if auth_token and auth_token.id_token == id_token and auth_token.id_token_claims:
-            return auth_token.id_token_claims
         return IDTokenClaims.decode_id_token(id_token=id_token)
 
     def logout(self, request: Request, callback_url: str) -> RedirectResponse:
