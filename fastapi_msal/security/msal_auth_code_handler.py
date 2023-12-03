@@ -48,6 +48,8 @@ class MSALAuthCodeHandler:
 
     async def parse_id_token(self, *, token: Union[AuthToken, str]) -> Optional[IDTokenClaims]:
         if isinstance(token, AuthToken):
+            if token.id_token_claims:
+                return token.id_token_claims
             id_token: str = token.id_token
         else:
             id_token = token

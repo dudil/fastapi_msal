@@ -50,7 +50,7 @@ class MSALScheme(SecurityBase):
         authorization: Optional[str] = request.headers.get("Authorization")
         scheme, token = get_authorization_scheme_param(authorization)
         if authorization and scheme.lower() == "bearer":
-            token_claims = await self.handler.parse_id_token(request=request, token=token)
+            token_claims = await self.handler.parse_id_token(token=token)
         else:
             # 1.b. retrieve token from session
             session_token: Optional[AuthToken] = await self.handler.get_token_from_session(request=request)
