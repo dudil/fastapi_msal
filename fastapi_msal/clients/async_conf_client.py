@@ -1,8 +1,6 @@
-import json
 from typing import Any, Callable, Optional, TypeVar
 
 from msal import ConfidentialClientApplication, SerializableTokenCache
-from msal.oauth2cli import oidc
 from starlette.concurrency import run_in_threadpool
 
 from fastapi_msal.core import MSALClientConfig, OptStr, OptStrsDict, StrsDict
@@ -10,7 +8,6 @@ from fastapi_msal.models import (
     AuthCode,
     AuthResponse,
     AuthToken,
-    IDTokenClaims,
     LocalAccount,
 )
 
@@ -23,7 +20,7 @@ class AsyncConfClient:
         client_config: MSALClientConfig,
         cache: Optional[SerializableTokenCache] = None,
     ):
-        self.client_config = client_config
+        self.client_config: MSALClientConfig = client_config
         self._cca = ConfidentialClientApplication(
             client_id=client_config.client_id,
             client_credential=client_config.client_credential,
@@ -38,18 +35,12 @@ class AsyncConfClient:
         result: T = await run_in_threadpool(func, **kwargs)
         return result
 
-    @staticmethod
-    def decode_id_token(id_token: str) -> Optional[IDTokenClaims]:
-        decoded: OptStrsDict = json.loads(oidc.decode_part(id_token.split(".")[1]))
-        if decoded:
-            return IDTokenClaims.model_validate(decoded)
-        return None
-
-    async def validate_id_token(self, id_token: str, nonce: OptStr = None) -> IDTokenClaims:
-        token_claims: OptStrsDict = await self.__execute_async__(
-            self._cca.client.decode_id_token, id_token=id_token, nonce=nonce
-        )
-        return IDTokenClaims.model_validate(token_claims)
+    async def validate_id_token(self, id_token: str, nonce: OptStr = None) -> bool:
+        try:
+            await self.__execute_async__(self._cca.client.decode_id_token, id_token=id_token, nonce=nonce)
+            return True
+        except RuntimeError:
+            return False
 
     async def get_application_token(self, claims_challenge: OptStrsDict = None) -> AuthToken:
         token: StrsDict = await self.__execute_async__(
