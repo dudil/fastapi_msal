@@ -75,7 +75,7 @@ class MSALAuthorization:
         token: AuthToken = await self.handler.authorize_access_token(request=request, code=code, state=state)
         return BearerToken(access_token=token.id_token)
 
-    async def _logout_route(self, request: Request, referer: OptStr = Header(None)) -> RedirectResponse:  # noqa: B008
+    async def _logout_route(self, request: Request, referer: Annotated[OptStr, Header()] = None) -> RedirectResponse:
         callback_url = referer if referer else str(self.return_to_path)
         return self.handler.logout(request=request, callback_url=callback_url)
 
