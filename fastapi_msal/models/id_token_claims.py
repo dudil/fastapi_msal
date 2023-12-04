@@ -1,6 +1,6 @@
 import json
 import time
-from enum import StrEnum
+from enum import Enum
 from typing import Optional, Union
 
 from msal.oauth2cli import oidc
@@ -11,7 +11,7 @@ from fastapi_msal.core import MSALPolicies, OptStr, OptStrsDict
 from .user_info import UserInfo
 
 
-class TokenStatus(StrEnum):
+class TokenStatus(Enum):
     """
     The validateion status of a token.
     https://openid.net/specs/openid-connect-core-1_0.html#IDTokenValidation
