@@ -76,11 +76,10 @@ class MSALAuthorization:
         return BearerToken(access_token=token.id_token)
 
     async def _logout_route(
-        self, request: Request, callback_url: OptStr, referer: Annotated[OptStr, Header()] = None
+        self, request: Request, referer: Annotated[OptStr, Header()] = None, callback_url: OptStr = None
     ) -> RedirectResponse:
         # check if callback_url is set, if not try to get it from referer header
-        if not callback_url:
-            callback_url = referer if referer else str(self.return_to_path)
+        callback_url = referer if referer else str(self.return_to_path)
         return self.handler.logout(request=request, callback_url=callback_url)
 
     async def get_session_token(self, request: Request) -> Optional[AuthToken]:
