@@ -71,11 +71,19 @@ class AADInternalClaims(BaseModel):
 
     uti: OptStr = None
     """
-    An internal claim used by Azure to revalidate tokens. Resources shouldn't use this claim.
+    Token identifier claim, equivalent to jti in the JWT specification. Unique,
+     per-token identifier that is case-sensitive.
     """
 
 
 class IDTokenClaims(UserInfo, AADInternalClaims):
+    """
+    The ID token is a security token that contains claims about the authentication of an end-user by
+      an authorization server, when using a client, and potentially other requested claims.
+    The ID token is represented as a JSON Web Token (JWT).
+    For more information: https://learn.microsoft.com/en-us/entra/identity-platform/id-token-claims-reference
+    """
+
     exp: Optional[float] = None
     """
     The expiration time claim is the time at which the token becomes invalid, represented in epoch time.
@@ -102,6 +110,37 @@ class IDTokenClaims(UserInfo, AADInternalClaims):
     It also should use the GUID portion of the claim to restrict the set of tenants that can sign in to the app.
     """
 
+    identity_provider: OptStr = Field(None, alias="idp")
+    """
+    Records the identity provider that authenticated the subject of the token.
+    This value is identical to the value of the issuer claim unless the user account isn't in the same tenant-
+     as the issuer - guests, for instance.
+    If the claim isn't present, it means that the value of iss can be used instead.
+    For personal accounts being used in an organizational context (for instance, a personal account invited to a tenant),
+    the idp claim may be 'live.com' or an STS URI containing the Microsoft account tenant-
+     9188040d-6c67-4c5b-b112-36a304b66dad.
+    """
+
+    code_hash: OptStr = Field(None, alias="c_hash")
+    """
+    The code hash is included in ID tokens only when the ID token is issued with an OAuth 2.0 authorization code.
+    It can be used to validate the authenticity of an authorization code. To understand how to do this validation,
+    see the OpenID Connect specification: https://openid.net/specs/openid-connect-core-1_0.html#HybridIDToken
+
+    This claim isn't returned on ID tokens from the /token endpoint.
+    """
+
+    access_token_hash: OptStr = Field(None, alias="at_hash")
+    """
+    The access token hash is included in ID tokens only when the ID token is issued from the /authorize endpoint
+     with an OAuth 2.0 access token.
+    It can be used to validate the authenticity of an access token.
+    To understand how to do this validation, see the OpenID Connect specification.
+    https://openid.net/specs/openid-connect-core-1_0.html#HybridIDToken
+
+    This claim isn't returned on ID tokens from the /token endpoint.
+    """
+
     subject: OptStr = Field(None, alias="sub")
     """
     This is the principal about which the token asserts information, such as the user of an app.
@@ -109,6 +148,14 @@ class IDTokenClaims(UserInfo, AADInternalClaims):
     It can be used to perform authorization checks safely, such as when the token is used to access a resource.
     By default, the subject claim is populated with the object ID of the user in the directory.
     To learn more: https://docs.microsoft.com/en-us/azure/active-directory-b2c/active-directory-b2c-token-session-sso
+    """
+
+    tenant_id: OptStr = Field(None, alias="tid")
+    """
+    Represents the tenant that the user is signing in to.
+    For work and school accounts, the GUID is the immutable tenant ID of the organization that the user is signing in to.
+    For sign-ins to the personal Microsoft account tenant (services like Xbox, Teams for Life, or Outlook),
+     the value is 9188040d-6c67-4c5b-b112-36a304b66dad.
     """
 
     audience: Union[OptStr, list[str]] = Field(None, alias="aud")

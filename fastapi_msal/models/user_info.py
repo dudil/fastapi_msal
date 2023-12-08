@@ -68,7 +68,28 @@ class UserInfo(BaseModel):
     The profile scope is required in order to receive this claim. Present only in v2.0 tokens.
     """
 
+    unique_name: OptStr = None
+    """
+    Only present in v1.0 tokens. Provides a human readable value that identifies the subject of the token.
+    This value isn't guaranteed to be unique within a tenant and should be used only for display purposes.
+    """
+
     is_new_user: Optional[bool] = Field(None, alias="newUser")
     """
     Indicated if this is a new user in the system (following a registration on AAD web part e.g.)
+    """
+
+    roles: OptStrList = None
+    """
+    The roles claim if its present - list of strings, each indicating a role assigned to the user
+    https://learn.microsoft.com/en-us/azure/active-directory/develop/howto-add-app-roles-in-apps
+    """
+
+    hasgroups: Optional[bool] = None
+    """
+    If present, always true, denoting the user is in at least one group.
+    Used in place of the groups claim for JWTs in implicit grant flows when the full groups claim extends-
+     the URI fragment beyond the URL length limits (currently six or more groups).
+    Indicates that the client should use the Microsoft Graph API to determine the user's groups
+    (https://graph.microsoft.com/v1.0/users/{userID}/getMemberObjects).
     """
