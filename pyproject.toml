@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "fastapi_msal"
-description = "FastAPI MSAL integration for Azure AD modern and fast python based authentication"
+description = "FastAPI/MSAL - The MSAL (Microsoft Authentication Library) plugin for FastAPI!"
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.9"
@@ -15,7 +15,7 @@ classifiers = [
     #   3 - Alpha
     #   4 - Beta
     #   5 - Production/Stable
-    "Development Status :: 4 - Beta",
+    "Development Status :: 5 - Production/Stable",
     # Indicate who your project is intended for
     "Intended Audience :: Developers",
     "Intended Audience :: Information Technology",
@@ -29,6 +29,7 @@ classifiers = [
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
 ]
 dynamic = ["version"]
 dependencies = ["pydantic>=2.4", "pydantic_settings>=2.0", "starlette", "fastapi", "msal"]
@@ -38,6 +39,7 @@ Homepage      = "https://github.com/dudil/fastapi_msal"
 Documentation = "https://github.com/dudil/fastapi_msal#readme"
 Issues        = "https://github.com/dudil/fastapi_msal/issues"
 Source        = "https://github.com/dudil/fastapi_msal"
+
 
 [tool.hatch.version]
 source = "vcs"
