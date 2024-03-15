@@ -63,9 +63,11 @@ class MSALClientConfig(BaseSettings):
         # set authority for single tenant authority
         if MSALPolicies.AAD_SINGLE == self.policy:
             authority_url = f"https://login.microsoftonline.com/{self.tenant}"
+            return authority_url
 
         if MSALPolicies.AAD_MULTI == self.policy:
             authority_url = "https://login.microsoftonline.com/common/"
+            return authority_url
 
         # Assume B2C policy, specific policy need to be set by user (predefined added B2C_LOGIN, B2C_PROFILE, B2C_CUSTOM)
         policy = self.b2c_policy or self.policy.value
