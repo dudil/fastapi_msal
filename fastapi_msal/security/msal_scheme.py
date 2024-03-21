@@ -1,22 +1,25 @@
-from typing import Optional, Dict
-from fastapi import Request, HTTPException, status
-from fastapi.openapi.models import OAuth2 as OAuth2Model, OAuthFlowAuthorizationCode
+from typing import Optional
+
+from fastapi import HTTPException, Request, status
+from fastapi.openapi.models import OAuth2 as OAuth2Model
+from fastapi.openapi.models import OAuthFlowAuthorizationCode, SecuritySchemeType
+from fastapi.openapi.models import OAuthFlows as OAuthFlowsModel
 from fastapi.security.base import SecurityBase
-from fastapi.openapi.models import OAuthFlows as OAuthFlowsModel, SecuritySchemeType
 from fastapi.security.utils import get_authorization_scheme_param
 
-from fastapi_msal.models import IDTokenClaims
+from fastapi_msal.models import AuthToken, IDTokenClaims, TokenStatus
+
 from .msal_auth_code_handler import MSALAuthCodeHandler
 
 
 class MSALScheme(SecurityBase):
     def __init__(
         self,
-        authorizationUrl: str,
-        tokenUrl: str,
+        authorization_url: str,
+        token_url: str,
         handler: MSALAuthCodeHandler,
-        refreshUrl: Optional[str] = None,
-        scopes: Optional[Dict[str, str]] = None,
+        refresh_url: Optional[str] = None,
+        scopes: Optional[dict[str, str]] = None,
     ):
         self.handler = handler
         if not scopes:
@@ -25,10 +28,10 @@ class MSALScheme(SecurityBase):
 
         flows = OAuthFlowsModel(
             authorizationCode=OAuthFlowAuthorizationCode(
-                authorizationUrl=authorizationUrl,
-                tokenUrl=tokenUrl,
+                authorizationUrl=authorization_url,
+                tokenUrl=token_url,
                 scopes=scopes,
-                refreshUrl=refreshUrl,
+                refreshUrl=refresh_url,
             )
         )
         # needs further investigation (type...)
@@ -40,13 +43,26 @@ class MSALScheme(SecurityBase):
             detail="Not authenticated",
             headers={"WWW-Authenticate": "Bearer"},
         )
-        authorization: str = request.headers.get("Authorization")
+
+        # 1. retrieve token from header or session
+        token_claims: Optional[IDTokenClaims] = None
+        # 1.a. retrieve token from header
+        authorization: Optional[str] = request.headers.get("Authorization")
         scheme, token = get_authorization_scheme_param(authorization)
-        if not authorization or scheme.lower() != "bearer":
-            raise http_exception
-        token_claims: Optional[IDTokenClaims] = await self.handler.parse_id_token(
-            request=request, token=token, validate=True
-        )
+        if authorization and scheme.lower() == "bearer":
+            token_claims = await self.handler.parse_id_token(token=token)
+        else:
+            # 1.b. retrieve token from session
+            session_token: Optional[AuthToken] = await self.handler.get_token_from_session(request=request)
+            if session_token:
+                token_claims = session_token.id_token_claims
+
+        # 2. validate token
         if not token_claims:
+            http_exception.detail = "No token found"
+            raise http_exception
+        token_status: TokenStatus = token_claims.validate_token(client_id=self.handler.client_config.client_id)
+        if token_status != TokenStatus.VALID:
+            http_exception.detail = token_status.value
             raise http_exception
         return token_claims

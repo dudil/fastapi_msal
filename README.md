@@ -49,9 +49,11 @@ pipenv install "fastapi_msal[full]"
 
 ## Usage
 1. Follow the application [registration process
-with the microsoft identity platform.](https://docs.microsoft.com/azure/active-directory/develop/quickstart-v2-register-an-app)
-Finishing the processes will allow you to retrieve your app_code and app_credentials (app_secret)
-As well as register your app callback path with the platform.
+with the Microsoft Identity Platform](https://docs.microsoft.com/azure/active-directory/develop/quickstart-v2-register-an-app). Finishing the processes will allow you to [register your app callback path with the platform](https://learn.microsoft.com/en-us/azure/active-directory/develop/quickstart-register-app#add-a-redirect-uri), as well as to retrieve your application `client_id`, `tenant_id` and `client_credential` ([client secrets](https://learn.microsoft.com/en-us/azure/active-directory/develop/quickstart-register-app#add-credentials)) - see images below:
+
+![Client and tenant ID page](docs/images/client_tenant_id_page.png)
+
+![Client secrets page](docs/images/client_secrets_page.png)
 
 2. Create a new main.py file and add the following lines.
 Make sure to update the lines with the information retrieved in the previous step
@@ -62,9 +64,9 @@ from starlette.middleware.sessions import SessionMiddleware
 from fastapi_msal import MSALAuthorization, UserInfo, MSALClientConfig
 
 client_config: MSALClientConfig = MSALClientConfig()
-client_config.client_id = "The Client ID rerived at step #1"
-client_config.client_credential = "The Client secret retrived at step #1"
-client_config.tenant = "Your tenant id"
+client_config.client_id = "The client_id retrieved at step #1"
+client_config.client_credential = "The client_credential retrieved at step #1"
+client_config.tenant = "Your tenant_id retrieved at step #1"
 
 app = FastAPI()
 app.add_middleware(SessionMiddleware, secret_key="SOME_SSH_KEY_ONLY_YOU_KNOW")  # replace with your own!!!

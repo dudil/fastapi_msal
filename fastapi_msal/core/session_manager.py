@@ -1,9 +1,11 @@
-from typing import Optional, TypeVar, Type
-from enum import Enum
 import json
-from pydantic import BaseModel
+from enum import Enum
+from typing import ClassVar, Optional, TypeVar
+
 from fastapi import Request
-from .utils import OptStr, StrsDict, OptStrsDict
+from pydantic import BaseModel
+
+from .utils import OptStr, OptStrsDict, StrsDict
 
 M = TypeVar("M", bound=BaseModel)
 SESSION_KEY: str = "sid"
@@ -16,25 +18,21 @@ class CacheType(Enum):
 
 
 class CacheManager:
-    cache_db: StrsDict = dict()
+    cache_db: ClassVar[StrsDict] = {}
 
     def __init__(self) -> None:
         pass
 
     @classmethod
-    def write(
-        cls, key: str, value: StrsDict
-    ) -> None:  # TODO: make sure we run this one at a time
+    def write(cls, key: str, value: StrsDict) -> None:  # TODO: make sure we run this one at a time
         value_json: str = json.dumps(value)
         cls.cache_db.update({key: value_json})
 
     @classmethod
-    def read(
-        cls, key: str
-    ) -> Optional[StrsDict]:  # TODO: make sure we run this one at a time
+    def read(cls, key: str) -> Optional[StrsDict]:  # TODO: make sure we run this one at a time
         value_json: OptStr = cls.cache_db.get(key, None)
         if value_json:
-            return json.loads(value_json)
+            return json.loads(value_json)  # type: ignore
         return None
 
     @classmethod
@@ -49,7 +47,7 @@ class SessionManager:
 
     @property
     def session_id(self) -> OptStr:
-        return self.request.session.get(SESSION_KEY, None)
+        return str(self.request.session.get(SESSION_KEY, None))
 
     def init_session(self, session_id: str) -> None:
         self.request.session.update({SESSION_KEY: session_id})
@@ -60,32 +58,28 @@ class SessionManager:
         session: OptStrsDict = self.cache_manager.read(self.session_id)
         if session:
             return session
-        return dict()  # return empty session object
+        return {}  # return empty session object
 
     def _write_session(self, session: StrsDict) -> None:
         if not self.session_id:
-            raise IOError(
-                "No session id, (Make sure you initialized the session by calling init_session)"
-            )
+            msg = "No session id, (Make sure you initialized the session by calling init_session)"
+            raise OSError(msg)
         self.cache_manager.write(key=self.session_id, value=session)
 
     def save(self, model: M) -> None:
         session: OptStrsDict = self._read_session()
         if session is None:
-            raise IOError(
-                "No session id, (Make sure you initialized the session by calling init_session)"
-            )
-        session.update(
-            {model.__repr_name__(): model.json(exclude_none=True, by_alias=True)}
-        )
+            msg = "No session id, (Make sure you initialized the session by calling init_session)"
+            raise OSError(msg)
+        session.update({model.__repr_name__(): model.model_dump_json(exclude_none=True, by_alias=True)})  # type: ignore
         self._write_session(session=session)
 
-    def load(self, model_cls: Type[M]) -> Optional[M]:
+    def load(self, model_cls: type[M]) -> Optional[M]:
         session: OptStrsDict = self._read_session()
         if session:
             raw_model: OptStr = session.get(model_cls.__name__, None)
             if raw_model:
-                return model_cls.parse_raw(raw_model)
+                return model_cls.model_validate_json(raw_model)
         return None
 
     def clear(self) -> None:
