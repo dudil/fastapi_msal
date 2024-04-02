@@ -50,6 +50,9 @@ class MSALClientConfig(BaseSettings):
     logout_path: str = "/_logout_route"
     show_in_docs: bool = False
 
+    # Optional uri for redirect (token path) in cases where the app is behind a reverse proxy (PR #35)
+    redirect_uri: OptStr = None
+
     # Optional Params for Logging and Telemetry with AAD
     app_name: OptStr = None
     app_version: OptStr = None
