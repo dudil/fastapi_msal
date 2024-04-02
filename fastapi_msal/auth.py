@@ -62,13 +62,11 @@ class MSALAuthorization:
         if client_id:
             print(client_id)
         if not redirect_uri:
-            if hasattr(self.handler.client_config, 'redirect_uri'):
+            if self.handler.client_config.redirect_uri:
                 redirect_uri = self.handler.client_config.redirect_uri
             else:
-                redirect_uri = request.url_for("_get_token_route")
-        return await self.handler.authorize_redirect(
-            request=request, redirec_uri=redirect_uri, state=state
-        )
+                redirect_uri = str(request.url_for("_get_token_route"))
+        return await self.handler.authorize_redirect(request=request, redirec_uri=redirect_uri, state=state)
 
     async def _get_token_route(self, request: Request, code: str, state: OptStr) -> RedirectResponse:
         await self.handler.authorize_access_token(request=request, code=code, state=state)
