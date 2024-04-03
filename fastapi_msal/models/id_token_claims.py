@@ -8,6 +8,7 @@ from pydantic import BaseModel, Field, PrivateAttr
 
 from fastapi_msal.core import MSALPolicies, OptStr, OptStrsDict
 
+from .base_auth_model import BaseAuthModel
 from .user_info import UserInfo
 
 
@@ -76,7 +77,7 @@ class AADInternalClaims(BaseModel):
     """
 
 
-class IDTokenClaims(UserInfo, AADInternalClaims):
+class IDTokenClaims(UserInfo, AADInternalClaims, BaseAuthModel):
     """
     The ID token is a security token that contains claims about the authentication of an end-user by
       an authorization server, when using a client, and potentially other requested claims.
@@ -193,6 +194,13 @@ class IDTokenClaims(UserInfo, AADInternalClaims):
     _id_token: Optional[str] = PrivateAttr(None)
     """
     The raw id_token that was used to create this object - private attribute for internal use only
+    Will be set only via the `decode_id_token` method
+    """
+
+    _decoded_token: OptStrsDict = PrivateAttr(None)
+    """
+    The decoded token that was used to create this object - private attribute for internal use only
+    Will be set only via the `decode_id_token` method
     """
 
     @staticmethod

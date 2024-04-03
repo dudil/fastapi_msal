@@ -1,8 +1,8 @@
-from typing import Optional
+from typing import Optional, Union
 
 from pydantic import BaseModel, Field
 
-from fastapi_msal.core import OptStr, OptStrList
+from fastapi_msal.core import OptStr, OptStrList, StrList
 
 
 class UserInfo(BaseModel):
@@ -92,4 +92,17 @@ class UserInfo(BaseModel):
      the URI fragment beyond the URL length limits (currently six or more groups).
     Indicates that the client should use the Microsoft Graph API to determine the user's groups
     (https://graph.microsoft.com/v1.0/users/{userID}/getMemberObjects).
+    """
+
+    groups: Union[StrList, str, None] = None
+    """
+    Provides object IDs that represent the group memberships of the subject.
+    The groupMembershipClaims property of the application manifest configures the groups claim on a per-application basis.
+    A value of null excludes all groups, a value of SecurityGroup includes only Active Directory Security Groups,
+    and a value of All includes both Security Groups and Microsoft 365 Distribution Lists.
+
+    See the hasgroups claim for details on using the groups claim with the implicit grant. For other flows,
+    if the number of groups the user is in goes over 150 for SAML and 200 for JWT,
+    then Microsoft Entra ID adds an overage claim to the claim sources.
+    The claim sources point to the Microsoft Graph endpoint that contains the list of groups for the user.
     """
