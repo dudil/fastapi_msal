@@ -65,7 +65,7 @@ dependencies = ["fastapi_msal[dev]"]
 
 [tool.hatch.envs.default.scripts]
 typing = "mypy --install-types --non-interactive {args:fastapi_msal}"
-style  = ["ruff {args:.}", "black --check --diff {args:.}"]
+style  = ["ruff check {args:.}", "black --check --diff {args:.}"]
 fmt    = ["black {args:.}", "ruff --fix {args:.}", "style"]
 test   = "pytest {args:tests}"
 all    = ["style", "typing"]
@@ -76,6 +76,9 @@ skip-string-normalization = true
 
 [tool.ruff]
 line-length = 122
+
+
+[tool.ruff.lint]
 select = [
     "A",
     "ARG",
@@ -122,14 +125,14 @@ unfixable = [
 ]
 ignore-init-module-imports = true
 
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 # avoid warnings related to __init__.py files imports
 "__init__.py" = ["PLC0414"]
 
 # Tests can use magic values, assertions, and relative imports
 "tests/**/*" = ["PLR2004", "S101", "TID252"]
 
-[tool.ruff.isort]
+[tool.ruff.lint.isort]
 known-first-party = ["fastapi_msal"]
 
 [tool.mypy]
