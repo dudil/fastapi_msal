@@ -85,22 +85,11 @@ class IDTokenClaims(UserInfo, AADInternalClaims, BaseAuthModel):
     For more information: https://learn.microsoft.com/en-us/entra/identity-platform/id-token-claims-reference
     """
 
-    exp: Optional[float] = None
+    audience: Union[OptStr, list[str]] = Field(None, alias="aud")
     """
-    The expiration time claim is the time at which the token becomes invalid, represented in epoch time.
-    Your app should use this claim to verify the validity of the token lifetime.
-    """
-
-    not_before: Optional[float] = Field(time.time() - 1, alias="nbf")
-    """
-    This claim is the time at which the token becomes valid, represented in epoch time.
-    This is usually the same as the time the token was issued.
-    Your app should use this claim to verify the validity of the token lifetime.
-    """
-
-    ver: OptStr = None
-    """
-    Indicates the version of the token.
+    An audience claim identifies the intended recipient of the token.
+    For Azure AD B2C, the audience is your app's Application ID, as assigned to your app in the app registration portal.
+    Your app should validate this value and reject the token if it does not match.
     """
 
     issuer: OptStr = Field(None, alias="iss")
@@ -109,6 +98,11 @@ class IDTokenClaims(UserInfo, AADInternalClaims, BaseAuthModel):
     It also identifies the Azure AD directory in which the user was authenticated.
     Your app should validate the issuer claim to ensure that the token came from the v2.0 endpoint.
     It also should use the GUID portion of the claim to restrict the set of tenants that can sign in to the app.
+    """
+
+    issue_time: Optional[float] = Field(None, alias="iat")
+    """
+    The time at which the token was issued, represented in epoch time.
     """
 
     identity_provider: OptStr = Field(None, alias="idp")
@@ -120,6 +114,19 @@ class IDTokenClaims(UserInfo, AADInternalClaims, BaseAuthModel):
     For personal accounts being used in an organizational context (for instance, a personal account invited to a tenant),
     the idp claim may be 'live.com' or an STS URI containing the Microsoft account tenant-
      9188040d-6c67-4c5b-b112-36a304b66dad.
+    """
+
+    not_before: Optional[float] = Field(time.time() - 1, alias="nbf")
+    """
+    This claim is the time at which the token becomes valid, represented in epoch time.
+    This is usually the same as the time the token was issued.
+    Your app should use this claim to verify the validity of the token lifetime.
+    """
+
+    exp: Optional[float] = None
+    """
+    The expiration time claim is the time at which the token becomes invalid, represented in epoch time.
+    Your app should use this claim to verify the validity of the token lifetime.
     """
 
     code_hash: OptStr = Field(None, alias="c_hash")
@@ -142,6 +149,28 @@ class IDTokenClaims(UserInfo, AADInternalClaims, BaseAuthModel):
     This claim isn't returned on ID tokens from the /token endpoint.
     """
 
+    nonce: OptStr = None
+    """
+    A nonce is a strategy used to mitigate token replay attacks.
+    Your app can specify a nonce in an authorization request by using the nonce query parameter.
+    The value you provide in the request will be emitted unmodified in the nonce claim of an ID token only.
+    This allows your app to verify the value against the value it specified on the request,
+    which associates the app's session with a given ID token.
+    Your app should perform this validation during the ID token validation process.
+    """
+
+    object_id: OptStr = Field(None, alias="oid")
+    """
+    The immutable identifier for an object, in this case, a user account.
+    This ID uniquely identifies the user across applications -
+    two different applications signing in the same user receives the same value in the oid claim.
+    Microsoft Graph returns this ID as the id property for a user account.
+    Because the oid allows multiple apps to correlate users,
+    the profile scope is required to receive this claim. If a single user exists in multiple tenants,
+    the user contains a different object ID in each tenant - they're considered different accounts,
+    even though the user logs into each account with the same credentials. The oid claim is a GUID and can't be reused.
+    """
+
     subject: OptStr = Field(None, alias="sub")
     """
     This is the principal about which the token asserts information, such as the user of an app.
@@ -159,27 +188,12 @@ class IDTokenClaims(UserInfo, AADInternalClaims, BaseAuthModel):
      the value is 9188040d-6c67-4c5b-b112-36a304b66dad.
     """
 
-    audience: Union[OptStr, list[str]] = Field(None, alias="aud")
+    ver: OptStr = None
     """
-    An audience claim identifies the intended recipient of the token.
-    For Azure AD B2C, the audience is your app's Application ID, as assigned to your app in the app registration portal.
-    Your app should validate this value and reject the token if it does not match.
+    Indicates the version of the token.
     """
 
-    nonce: OptStr = None
-    """
-    A nonce is a strategy used to mitigate token replay attacks.
-    Your app can specify a nonce in an authorization request by using the nonce query parameter.
-    The value you provide in the request will be emitted unmodified in the nonce claim of an ID token only.
-    This allows your app to verify the value against the value it specified on the request,
-    which associates the app's session with a given ID token.
-    Your app should perform this validation during the ID token validation process.
-    """
-
-    issue_time: Optional[float] = Field(None, alias="iat")
-    """
-    The time at which the token was issued, represented in epoch time.
-    """
+    #### Review the below claims if still needed
 
     auth_time: Optional[float] = None
     """
@@ -191,15 +205,11 @@ class IDTokenClaims(UserInfo, AADInternalClaims, BaseAuthModel):
     This is the name of the policy that was used to acquire the token.
     """
 
+    ### Private attributes
+
     _id_token: Optional[str] = PrivateAttr(None)
     """
     The raw id_token that was used to create this object - private attribute for internal use only
-    Will be set only via the `decode_id_token` method
-    """
-
-    _decoded_token: OptStrsDict = PrivateAttr(None)
-    """
-    The decoded token that was used to create this object - private attribute for internal use only
     Will be set only via the `decode_id_token` method
     """
 
