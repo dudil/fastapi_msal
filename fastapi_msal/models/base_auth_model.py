@@ -1,6 +1,6 @@
 from typing import Optional, TypeVar
 
-from pydantic import BaseModel, PrivateAttr
+from pydantic import BaseModel, ConfigDict, PrivateAttr
 
 from fastapi_msal.core import OptStrsDict, SessionManager, StrsDict
 
@@ -9,6 +9,14 @@ AuthModel = TypeVar("AuthModel", bound="BaseAuthModel")
 
 class BaseAuthModel(BaseModel):
     _recieved: OptStrsDict = PrivateAttr(None)
+    model_config = ConfigDict(extra="allow")
+    """
+    extra="allow"
+        for Pydantic to save additional fields that are not defined in the model.
+        Since the ID token can have additional fields defined in the app registration portal.
+        To access these fields (if any), use the `__pydantic_extra__` attribute of the object.
+        https://docs.pydantic.dev/latest/concepts/models/#extra-fields
+    """
 
     @classmethod
     def parse_obj_debug(cls: type[AuthModel], to_parse: StrsDict) -> AuthModel:
