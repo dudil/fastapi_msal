@@ -159,18 +159,6 @@ class IDTokenClaims(UserInfo, AADInternalClaims, BaseAuthModel):
     Your app should perform this validation during the ID token validation process.
     """
 
-    object_id: OptStr = Field(None, alias="oid")
-    """
-    The immutable identifier for an object, in this case, a user account.
-    This ID uniquely identifies the user across applications -
-    two different applications signing in the same user receives the same value in the oid claim.
-    Microsoft Graph returns this ID as the id property for a user account.
-    Because the oid allows multiple apps to correlate users,
-    the profile scope is required to receive this claim. If a single user exists in multiple tenants,
-    the user contains a different object ID in each tenant - they're considered different accounts,
-    even though the user logs into each account with the same credentials. The oid claim is a GUID and can't be reused.
-    """
-
     subject: OptStr = Field(None, alias="sub")
     """
     This is the principal about which the token asserts information, such as the user of an app.
