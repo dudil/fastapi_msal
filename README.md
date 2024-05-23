@@ -33,11 +33,11 @@ pip install "fastapi_msal"
 ```
 Or if you wish to have all the required packages straight forward
 ```shell
-pipenv install "fastapi_msal[full]"
+pip install "fastapi_msal[full]"
 ```
 
 ## Prerequisets
-1. Python 3.7 and above
+1. Python 3.9 and above
 2. As part of your fastapi application the following packages should be included:  
 (if you use the **[full]** method it is not required.)
    1. [python-multipart](https://andrew-d.github.io/python-multipart/),
@@ -111,8 +111,3 @@ If you wish to try out a working example, clone the following project and adjust
 [https://github.com/dudil/ms-identity-python-webapp](https://github.com/dudil/ms-identity-python-webapp)
 
 **NB!** Make sure you are using the *fastapi_msal* branch!!!
-
-## TODO List
-- [ ] Add support for local/redis session cache
-- [ ] Add Tests
-- [ ] Proper Documentation
