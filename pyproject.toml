@@ -118,12 +118,16 @@ ignore = [
     # "C901",  "PLR0912", "PLR0911", "PLR0915",
     # Ignore print in code
     "T201",
+    # Ignore prefer absolute imports over relative imports
+    "TID252",
+    # Ignore due to possible conflicts when used with the formatter
+    "ISC001",
 ]
 unfixable = [
     # Don't touch unused imports
     "F401",
 ]
-ignore-init-module-imports = true
+# ignore-init-module-imports = true
 
 [tool.ruff.lint.per-file-ignores]
 # avoid warnings related to __init__.py files imports

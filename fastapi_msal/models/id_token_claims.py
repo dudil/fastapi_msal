@@ -6,7 +6,7 @@ from typing import Optional, Union
 from msal.oauth2cli import oidc
 from pydantic import BaseModel, Field, PrivateAttr
 
-from fastapi_msal.core import MSALPolicies, OptStr, OptStrsDict
+from fastapi_msal.core import OptStr, OptStrsDict
 
 from .base_auth_model import BaseAuthModel
 from .user_info import UserInfo
@@ -188,7 +188,7 @@ class IDTokenClaims(UserInfo, AADInternalClaims, BaseAuthModel):
     This claim is the time at which a user last entered credentials, represented in epoch time.
     """
 
-    msal_policy: Optional[MSALPolicies] = Field(None, alias="tfp")
+    msal_policy: OptStr = Field(None, alias="tfp")
     """
     This is the name of the policy that was used to acquire the token.
     """
