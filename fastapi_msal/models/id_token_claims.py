@@ -188,7 +188,7 @@ class IDTokenClaims(UserInfo, AADInternalClaims, BaseAuthModel):
     This claim is the time at which a user last entered credentials, represented in epoch time.
     """
 
-    msal_policy: Optional[str] = Field(None, alias="tfp")
+    msal_policy: OptStr = Field(None, alias="tfp")
     """
     This is the name of the policy that was used to acquire the token.
     """
