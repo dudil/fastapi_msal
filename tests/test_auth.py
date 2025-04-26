@@ -9,52 +9,45 @@ from fastapi_msal import MSALAuthorization, MSALClientConfig
 
 
 @pytest.fixture
-def dummy_client_config():
-    return MSALClientConfig()
+def auth():
+    return MSALAuthorization(client_config=MSALClientConfig(), return_to_path="https://www.example.com")
 
 
-def test_return_to_path(dummy_client_config):
-    auth = MSALAuthorization(client_config=dummy_client_config, return_to_path="https://www.example.com")
-
+@pytest.fixture
+def app(auth):
     app = FastAPI()
     app.add_middleware(SessionMiddleware, secret_key="")
     app.include_router(auth.router)
-    client = TestClient(app, follow_redirects=False)
-    response = client.get(app.url_path_for("_logout_route"))
-    assert response.is_redirect
-
-    redirect = urlparse(response.headers.get("Location"))
-    assert parse_qs(redirect.query)["post_logout_redirect_uri"][0] == "https://www.example.com"
+    return app
 
 
-def test_referer_precedence_over_return_to_path(dummy_client_config):
-    auth = MSALAuthorization(client_config=dummy_client_config, return_to_path="https://www.example.com")
+class TestLogoutRedirect:
+    def post_logout_redirect_for(self, response):
+        redirect = urlparse(response.headers.get("Location"))
+        return parse_qs(redirect.query)["post_logout_redirect_uri"][0]
 
-    app = FastAPI()
-    app.add_middleware(SessionMiddleware, secret_key="")
-    app.include_router(auth.router)
-    client = TestClient(app, follow_redirects=False)
-    response = client.get(app.url_path_for("_logout_route"), headers={"Referer": "https://github.com/dudil/fastapi_msal"})
-    assert response.is_redirect
+    @pytest.fixture
+    def get_logout(self, app):
+        def http_get_logout(*, headers=None, params=None):
+            client = TestClient(app, follow_redirects=False)
+            return client.get(app.url_path_for("_logout_route"), headers=headers, params=params)
 
-    redirect = urlparse(response.headers.get("Location"))
-    assert parse_qs(redirect.query)["post_logout_redirect_uri"][0] == "https://github.com/dudil/fastapi_msal"
+        return http_get_logout
 
+    def test_return_to_path(self, get_logout):
+        response = get_logout()
+        assert response.is_redirect
+        assert self.post_logout_redirect_for(response) == "https://www.example.com"
 
-def test_callback_url_takes_precedence_over_referer(dummy_client_config):
-    auth = MSALAuthorization(client_config=dummy_client_config, return_to_path="https://www.example.com")
+    def test_referer_precedence_over_return_to_path(self, get_logout):
+        response = get_logout(headers={"Referer": "https://github.com/dudil/fastapi_msal"})
+        assert response.is_redirect
+        assert self.post_logout_redirect_for(response) == "https://github.com/dudil/fastapi_msal"
 
-    app = FastAPI()
-    app.add_middleware(SessionMiddleware, secret_key="")
-    app.include_router(auth.router)
-    print(app.routes)
-    client = TestClient(app, follow_redirects=False)
-    response = client.get(
-        app.url_path_for("_logout_route"),
-        headers={"Referer": "https://github.com/dudil/fastapi_msal"},
-        params={"callback_url": "https://pypi.org/project/fastapi-msal"},
-    )
-    assert response.is_redirect
-
-    redirect = urlparse(response.headers.get("Location"))
-    assert parse_qs(redirect.query)["post_logout_redirect_uri"][0] == "https://pypi.org/project/fastapi-msal"
+    def test_callback_url_takes_precedence_over_referer(self, get_logout):
+        response = get_logout(
+            headers={"Referer": "https://github.com/dudil/fastapi_msal"},
+            params={"callback_url": "https://pypi.org/project/fastapi-msal"},
+        )
+        assert response.is_redirect
+        assert self.post_logout_redirect_for(response) == "https://pypi.org/project/fastapi-msal"
