@@ -5,7 +5,7 @@ from fastapi_msal.core import OptStr, StrsDict
 
 class BearerToken(BaseModel):
     access_token: str
-    token_type: str = "bearer"
+    token_type: str = "bearer"  # noqa: S105
 
     def generate_header(self) -> StrsDict:
         return {"Authorization": f"{self.token_type} {self.access_token}"}

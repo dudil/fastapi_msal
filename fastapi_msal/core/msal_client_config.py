@@ -48,7 +48,7 @@ class MSALClientConfig(BaseSettings):
     # Set the following params if you wish to change the default MSAL Router endpoints
     path_prefix: str = ""
     login_path: str = "/_login_route"
-    token_path: str = "/token"
+    token_path: str = "/token"  # noqa: S105
     logout_path: str = "/_logout_route"
     show_in_docs: bool = False
 
