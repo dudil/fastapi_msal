@@ -57,7 +57,7 @@ exclude = ["docs/", "/.venv/", "/.vscode/", "/.github/", "/.gitignore", "/.gitat
 
 [project.optional-dependencies]
 full = ["python-multipart", "itsdangerous"]
-dev  = ["fastapi_msal[full]", "black", "ruff", "mypy", "pytest"]
+dev  = ["fastapi_msal[full]", "black", "ruff", "mypy", "pytest", "httpx"]
 
 [tool.hatch.envs.default]
 path         = ".venv"
