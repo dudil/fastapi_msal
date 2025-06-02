@@ -98,7 +98,7 @@ INFO:     Application startup complete.
 
 5. Using the "built-in" authenticaiton button (the little lock) you will be able to set the full authentication process
 ![Authorize Page Image](https://github.com/dudil/fastapi_msal/blob/master/docs/images/authorize_page.png?raw=true)
-   (Igonre the cline_id and client_secret - they are not relevant for the process as you already set them)
+   (Ignore the client_id and client_secret - they are not relevant for the process as you already set them)
 
 6. After you complete the process you will get a confirmation popup
 ![Token Page Image](https://github.com/dudil/fastapi_msal/blob/master/docs/images/token_page.png?raw=true)
