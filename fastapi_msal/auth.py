@@ -92,7 +92,7 @@ class MSALAuthorization:
         auth_token: Optional[AuthToken] = await self.get_session_token(request)
         if auth_token:
             token_claims: Optional[IDTokenClaims] = await self.handler.parse_id_token(token=auth_token)
-            if token_claims and token_claims.validate_token():
+            if token_claims and token.id_token_claims.validate_token() == TokenStatus.VALID:
                 return True
         return False
 
