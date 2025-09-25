@@ -7,6 +7,7 @@ from starlette.responses import RedirectResponse
 from fastapi_msal.core import MSALClientConfig, OptStr
 from fastapi_msal.models import AuthToken, BearerToken, IDTokenClaims
 from fastapi_msal.security import MSALAuthCodeHandler, MSALScheme
+from fastapi_msal.models.id_token_claims import TokenStatus
 
 
 class MSALAuthorization:
