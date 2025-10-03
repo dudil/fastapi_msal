@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Callable, Optional
 
 from fastapi import HTTPException, Request, status
 from fastapi.openapi.models import OAuth2 as OAuth2Model
@@ -7,9 +7,14 @@ from fastapi.openapi.models import OAuthFlows as OAuthFlowsModel
 from fastapi.security.base import SecurityBase
 from fastapi.security.utils import get_authorization_scheme_param
 
-from fastapi_msal.models import AuthToken, IDTokenClaims, TokenStatus
+from fastapi_msal.models import AuthToken, IDTokenClaims, TokenStatus, UserInfo
 
 from .msal_auth_code_handler import MSALAuthCodeHandler
+
+
+def default_claims_processing(request: Request, token_claims: IDTokenClaims) -> None:
+    """Retrieve user info from token claims and add that to request.state"""
+    request.state.user = UserInfo(**dict(token_claims))
 
 
 class MSALScheme(SecurityBase):
@@ -20,6 +25,7 @@ class MSALScheme(SecurityBase):
         handler: MSALAuthCodeHandler,
         refresh_url: Optional[str] = None,
         scopes: Optional[dict[str, str]] = None,
+        claims_processing: Callable[[Request, IDTokenClaims], None] | None = None
     ):
         self.handler = handler
         if not scopes:
@@ -36,6 +42,7 @@ class MSALScheme(SecurityBase):
         )
         # needs further investigation (type...)
         self.model = OAuth2Model(flows=flows, type=SecuritySchemeType.oauth2)
+        self.claims_processing = claims_processing
 
     async def __call__(self, request: Request) -> IDTokenClaims:
         http_exception = HTTPException(
@@ -65,4 +72,6 @@ class MSALScheme(SecurityBase):
         if token_status != TokenStatus.VALID:
             http_exception.detail = token_status.value
             raise http_exception
+        if self.claims_processing:
+            self.claims_processing(request, token_claims)
         return token_claims
