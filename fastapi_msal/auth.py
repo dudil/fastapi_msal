@@ -1,4 +1,4 @@
-from typing import Annotated, Optional
+from typing import Annotated, Callable, Optional
 
 from fastapi import APIRouter, Form, Header
 from starlette.requests import Request
@@ -15,11 +15,13 @@ class MSALAuthorization:
         client_config: MSALClientConfig,
         return_to_path: str = "/",
         tags: Optional[list[str]] = None,  # type: ignore [unused-ignore]
+        claims_processing: Callable[[Request, IDTokenClaims], None] | None = None,
     ):
         self.handler = MSALAuthCodeHandler(client_config=client_config)
         if not tags:
             tags = ["authentication"]
         self.return_to_path = return_to_path
+        self.claims_processing = claims_processing
         self.router = APIRouter(prefix=client_config.path_prefix, tags=tags)  # type: ignore
         self.router.add_api_route(
             name="_login_route",
@@ -102,4 +104,5 @@ class MSALAuthorization:
             authorization_url=self.router.url_path_for("_login_route"),
             token_url=self.router.url_path_for("_post_token_route"),
             handler=self.handler,
+            claims_processing=self.claims_processing,
         )
