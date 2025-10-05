@@ -7,6 +7,7 @@ from starlette.responses import RedirectResponse
 from fastapi_msal.core import MSALClientConfig, OptStr
 from fastapi_msal.models import AuthToken, BearerToken, IDTokenClaims
 from fastapi_msal.security import MSALAuthCodeHandler, MSALScheme
+from fastapi_msal.models.id_token_claims import TokenStatus
 
 
 class MSALAuthorization:
@@ -92,7 +93,7 @@ class MSALAuthorization:
         auth_token: Optional[AuthToken] = await self.get_session_token(request)
         if auth_token:
             token_claims: Optional[IDTokenClaims] = await self.handler.parse_id_token(token=auth_token)
-            if token_claims and token_claims.validate_token():
+            if token_claims and token_claims.validate_token() == TokenStatus.VALID:
                 return True
         return False
 
