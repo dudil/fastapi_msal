@@ -15,7 +15,7 @@ class MSALAuthorization:
         client_config: MSALClientConfig,
         return_to_path: str = "/",
         tags: Optional[list[str]] = None,  # type: ignore [unused-ignore]
-        claims_processing: Callable[[Request, IDTokenClaims], None] | None = None,
+        claims_processing: Optional[Callable[[Request, IDTokenClaims], None]] = None,
     ):
         self.handler = MSALAuthCodeHandler(client_config=client_config)
         if not tags:
