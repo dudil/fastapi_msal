@@ -25,7 +25,7 @@ class MSALScheme(SecurityBase):
         handler: MSALAuthCodeHandler,
         refresh_url: Optional[str] = None,
         scopes: Optional[dict[str, str]] = None,
-        claims_processing: Callable[[Request, IDTokenClaims], None] | None = None
+        claims_processing: Optional[Callable[[Request, IDTokenClaims], None]] = None
     ):
         self.handler = handler
         if not scopes:
