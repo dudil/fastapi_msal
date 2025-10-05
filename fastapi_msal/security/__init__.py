@@ -1,2 +1,3 @@
 from .msal_auth_code_handler import MSALAuthCodeHandler as MSALAuthCodeHandler
 from .msal_scheme import MSALScheme as MSALScheme
+from .msal_scheme import default_claims_processing as default_claims_processing
