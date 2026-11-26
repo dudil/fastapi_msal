@@ -16,11 +16,13 @@ class MSALAuthorization:
         client_config: MSALClientConfig,
         return_to_path: str = "/",
         tags: Optional[list[str]] = None,  # type: ignore [unused-ignore]
+        include_query_params_in_path: bool = False,
     ):
         self.handler = MSALAuthCodeHandler(client_config=client_config)
         if not tags:
             tags = ["authentication"]
         self.return_to_path = return_to_path
+        self.include_query_params_in_path = include_query_params_in_path
         self.router = APIRouter(prefix=client_config.path_prefix, tags=tags)  # type: ignore
         self.router.add_api_route(
             name="_login_route",
@@ -67,11 +69,16 @@ class MSALAuthorization:
                 redirect_uri = self.handler.client_config.redirect_uri
             else:
                 redirect_uri = str(request.url_for("_get_token_route"))
+        if self.include_query_params_in_path:
+            request.session["query_params"] = str(request.query_params)
         return await self.handler.authorize_redirect(request=request, redirec_uri=redirect_uri, state=state)
 
     async def _get_token_route(self, request: Request, code: str, state: OptStr) -> RedirectResponse:
         await self.handler.authorize_access_token(request=request, code=code, state=state)
-        return RedirectResponse(url=f"{self.return_to_path}", headers=dict(request.headers.items()))
+        redirect_url = self.return_to_path
+        if self.include_query_params_in_path:
+            redirect_url = f"{self.return_to_path}?{request.session["query_params"]}"
+        return RedirectResponse(url=redirect_url, headers=dict(request.headers.items()))
 
     async def _post_token_route(
         self, request: Request, code: Annotated[str, Form()], state: Annotated[OptStr, Form()] = None
